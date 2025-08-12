@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->brandLogo('/img/pln batam low res (3).png')
             ->brandLogoHeight('3rem')
-            
+        
             ->spa(true)
             
 

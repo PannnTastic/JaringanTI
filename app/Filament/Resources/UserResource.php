@@ -2,23 +2,28 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
-use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\User;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Hash;
+use Filament\Forms\Components\Select;
+use function Livewire\Volt\dehydrate;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\UserResource\Pages;
+
+use NunoMaduro\Collision\Adapters\Phpunit\State;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\UserResource\RelationManagers;
+use Filament\Forms\Components\Checkbox;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationIcon = 'heroicon-s-user';
 
     public static function form(Form $form): Form
     {
@@ -33,13 +38,25 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-                
+                Checkbox::make('change_password')
+                ->label('Ganti Password')
+                ->reactive()
+                ->hidden(fn (string $context): bool => $context === 'create' )
+                ->dehydrated(false),
                 Forms\Components\TextInput::make('password')
                     ->label('Password')
                     ->password()
-                    ->required()
+                    ->required(fn (string $context): bool => $context === 'create')
                     ->revealable()
-                    ->maxLength(255),
+                    ->maxLength(12)
+                    ->placeholder(fn (string $context): string => 
+                    $context === 'edit' ? 'Masukkan password baru' : 'Masukkan password'
+                    )
+                     ->hidden(fn (string $context, callable $get): bool => 
+                    $context === 'edit' && !$get('change_password')
+                    )
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->dehydrateStateUsing(fn ($state) => $state ? Hash::make($state) : null),
                 Forms\Components\Toggle::make('status')
                     ->label('Status')
                     ->required(),
