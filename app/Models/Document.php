@@ -6,16 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Gardu extends Model
+class Document extends Model
 {
-    /** @use HasFactory<\Database\Factories\GarduFactory> */
+    /** @use HasFactory<\Database\Factories\DocumentFactory> */
     use HasFactory,SoftDeletes;
-    protected $primaryKey = 'gardu_id';
+
+    protected $primaryKey = 'doc_id';
+
     protected $guarded = [];
 
-    public function pops()
-    {
-        return $this->belongsTo(Pop::class, 'gardu_pop', 'pop_id');
+    public function users() {
+        return $this->belongsTo(User::class,'user_id');
+    
     }
-
 }
+

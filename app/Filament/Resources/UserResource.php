@@ -18,6 +18,7 @@ use NunoMaduro\Collision\Adapters\Phpunit\State;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\UserResource\RelationManagers;
 use Filament\Forms\Components\Checkbox;
+use Filament\Tables\Filters\TrashedFilter;
 
 class UserResource extends Resource
 {
@@ -83,9 +84,9 @@ class UserResource extends Resource
                 Tables\Columns\IconColumn::make('status')
                     ->label('Status')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('role_id')
-                    ->label('ID Role')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('role.role_name')
+                    ->label('Role')
+                    
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -101,15 +102,20 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TrashedFilter::make()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                
+                Tables\Actions\ForceDeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -117,7 +123,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            
         ];
     }
 
@@ -128,5 +134,13 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\UserVendorChart;
+use App\Filament\Widgets\LatestActivity;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -27,9 +30,12 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            
             ->login()
+
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::Blue
+                ,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -38,9 +44,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                StatsOverview::class,
+                UserVendorChart::class,
+                LatestActivity::class,
+                Widgets\AccountWidget::class,  
             ])
+            
             ->brandLogo('/img/pln batam low res (3).png')
             ->brandLogoHeight('3rem')
         

@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -24,39 +25,58 @@ class GarduResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('gardu_name')
+                    ->label('Nama Gardu')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('gardu_feeder')
+                    ->label('Feeder')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('gardu_motorized')
-                    ->required()
+                    ->label('Motorized')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('gardu_jarkom')
-                    ->required()
+                    ->label('Jarkom')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('gardu_proritas')
+                    ->label('Prioritas')
+                    ->numeric()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('gardu_fo')
+                Forms\Components\Select::make('gardu_fo')
+                    ->label('FO')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('gardu_pop')
+                    ->options([
+                        'Selesai' => 'Selesai',
+                        'Survey' => 'Survey',
+                        'Belum' => 'Belum',
+                        'Progres' => 'Progres',
+                        'Ada' => 'Ada'
+                    ]),
+                Forms\Components\Select::make('gardu_pop')
+                    ->label('POP')
                     ->required()
-                    ->maxLength(255),
+                    ->relationship('pops','pop_name'),
                 Forms\Components\TextInput::make('gardu_terdekat')
-                    ->required()
+                    ->label('Gardu Terdekat')
+                    ->default('-')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('gardu_kabel_fa')
-                    ->required()
-                    ->maxLength(255),
+                    ->label('Kabel FA')
+                    ->prefix('MTR')
+                    ->default(0)
+                    ->numeric(),
                 Forms\Components\TextInput::make('gardu_kabel_fig')
-                    ->required()
-                    ->maxLength(255),
+                    ->label('Kabel FIG')
+                    ->prefix('MTR')
+                    ->default(0)
+                    ->numeric(),
                 Forms\Components\TextInput::make('gardu_petik_core')
+                    ->label('Petik Core')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('gardu_pekerjaan')
+                    ->label('Pekerjaan')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('gardu_rab')
@@ -124,7 +144,7 @@ class GarduResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                TrashedFilter::make()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -151,5 +171,12 @@ class GarduResource extends Resource
             'create' => Pages\CreateGardu::route('/create'),
             'edit' => Pages\EditGardu::route('/{record}/edit'),
         ];
+    }
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }
