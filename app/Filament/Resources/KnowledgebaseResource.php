@@ -2,54 +2,43 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RoleResource\Pages;
-use App\Filament\Resources\RoleResource\RelationManagers;
-use App\Models\Role;
-use App\Models\Permission;
+use App\Filament\Resources\KnowledgebaseResource\Pages;
+use App\Filament\Resources\KnowledgebaseResource\RelationManagers;
+use App\Models\Knowledgebase;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class RoleResource extends Resource
+class KnowledgebaseResource extends Resource
 {
-    protected static ?string $model = Role::class;
+    protected static ?string $model = Knowledgebase::class;
 
-    protected static ?string $navigationIcon = 'heroicon-s-shield-check';
+    protected static ?string $navigationIcon = 'heroicon-s-book-open';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('role_name')
-                    ->placeholder('Masukkan Role')
-                    ->label('Role')
+                Forms\Components\TextInput::make('kb_name')
+                    ->label('Nama Knowledgebase')
                     ->required()
                     ->maxLength(255),
-                    
-                Forms\Components\Toggle::make('role_status')
-                    ->label('Status Role')
-                    ->default(true)
+                Forms\Components\Toggle::make('kb_status')
+                    ->label('Status Knowledgebase')
                     ->required(),
-
-                Forms\Components\Section::make('Permissions')
-                    ->description('Pilih menu yang dapat diakses oleh role ini')
-                    ->schema([
-                        Forms\Components\CheckboxList::make('permissions')
-                            ->label('Menu Access')
-                            ->relationship('permissions', 'permission_name')
-                            
-                            ->columns(2)
-                            ->gridDirection('row')
-                            ->bulkToggleable()
-                    ])
-                    ->collapsible()
-                    ->persistCollapsed()
+                Forms\Components\Select::make('kbc_id')
+                    ->label('Kategori Knowledgebase')
+                    ->required()
+                    ->relationship('category', 'kbc_name'),
+                Forms\Components\RichEditor::make('kb_content')
+                    ->label('Konten Knowledgebase')
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -57,14 +46,15 @@ class RoleResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('role_name')
-                    ->label('Role')
+                Tables\Columns\TextColumn::make('kb_name')
+                    ->label('Nama Knowledgebase')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('role_status')
-                    ->label('Status Role')
+                Tables\Columns\IconColumn::make('kb_status')
+                    ->label('Status Knowledgebase')
                     ->boolean(),
-                TextColumn::make('permissions.permission_name')
-                    ->label('Permissions'),
+                Tables\Columns\TextColumn::make('category.kbc_name')
+                    ->label('Nama Knowledgebase Kategori')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -77,6 +67,7 @@ class RoleResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                    
             ])
             ->filters([
                 TrashedFilter::make()
@@ -88,6 +79,8 @@ class RoleResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -102,11 +95,12 @@ class RoleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRoles::route('/'),
-            'create' => Pages\CreateRole::route('/create'),
-            'edit' => Pages\EditRole::route('/{record}/edit'),
+            'index' => Pages\ListKnowledgebases::route('/'),
+            'create' => Pages\CreateKnowledgebase::route('/create'),
+            'edit' => Pages\EditKnowledgebase::route('/{record}/edit'),
         ];
     }
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -116,11 +110,11 @@ class RoleResource extends Resource
     }
     public static function shouldRegisterNavigation(): bool
     {
-        return \App\Helpers\PermissionHelper::canAccessResource('roles');
+        return \App\Helpers\PermissionHelper::canAccessResource('knowledgebases');
     }
 
     public static function canViewAny(): bool
     {
-        return \App\Helpers\PermissionHelper::canAccessResource('roles');
+        return \App\Helpers\PermissionHelper::canAccessResource('knowledgebases');
     }
 }

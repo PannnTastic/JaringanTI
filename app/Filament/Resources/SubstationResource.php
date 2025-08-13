@@ -149,10 +149,9 @@ class SubstationResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
+                    Tables\Columns\TextColumn::make('users.name')
                     ->sortable(),
-                    Tables\Columns\TextColumn::make('pop_id')
+                    Tables\Columns\TextColumn::make('pops.pop_name')
                         ->searchable(),
             ])
             ->filters([

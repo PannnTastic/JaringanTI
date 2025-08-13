@@ -45,7 +45,6 @@ class DocumentResource extends Resource
                     ->directory('documents')
                     ->preserveFilenames()
                    ->previewable()
-                    ->maxSize(2048)
                     ->acceptedFileTypes([
                         'application/pdf',
                         'image/png',
