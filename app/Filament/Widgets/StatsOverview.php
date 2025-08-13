@@ -8,6 +8,7 @@ use App\Models\Vendor;
 use App\Models\Budget;
 use App\Models\Gardu;
 use App\Models\Pop;
+use App\Models\Substation;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -48,8 +49,8 @@ class StatsOverview extends BaseWidget
                     'class' => 'md:col-span-1',
                 ]),
 
-            Stat::make('Total Gardu', Gardu::count())
-                ->description('Gardu')
+            Stat::make('Total Substation', Substation::count())
+                ->description('Substation')
                 ->color('primary')
                 ->extraAttributes([
                     // span 2 kolom di md ke atas

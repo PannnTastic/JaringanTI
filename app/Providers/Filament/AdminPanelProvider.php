@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\UserVendorChart;
 use App\Filament\Widgets\LatestActivity;
+use App\Http\Middleware\FilamentRolePermission;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -49,6 +50,7 @@ class AdminPanelProvider extends PanelProvider
                 LatestActivity::class,
                 Widgets\AccountWidget::class,  
             ])
+            ->favicon('/img/favicon16x16.ico')
             
             ->brandLogo('/img/pln batam low res (3).png')
             ->brandLogoHeight('3rem')
@@ -69,6 +71,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                FilamentRolePermission::class
             ]);
     }
 }

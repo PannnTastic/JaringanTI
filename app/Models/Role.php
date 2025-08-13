@@ -13,10 +13,29 @@ class Role extends Model
 
     protected $primaryKey = 'role_id';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'role_name',
+        'role_status'
+    ];
+
+    protected $casts = [
+        'role_status' => 'boolean',
+    ];
 
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    // Relationship dengan Permission (many-to-many)
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'role_permissions', 'role_id', 'permission_id');
+    }
+
+    // Helper method untuk mengecek permission
+    public function hasPermission($permissionName)
+    {
+        return $this->permissions()->where('permission_name', $permissionName)->exists();
     }
 }

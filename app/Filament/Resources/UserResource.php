@@ -143,4 +143,13 @@ class UserResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('users');
+    }
+
+    public static function canViewAny(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('users');
+    }
 }

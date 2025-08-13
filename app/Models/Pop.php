@@ -14,8 +14,8 @@ class Pop extends Model
     protected $primaryKey = 'pop_id';
     protected $guarded = [];
 
-    public function gardus()
+    public function substations()
     {
-        return $this->hasMany(Gardu::class, 'gardu_pop', 'pop_id');
+        return $this->hasMany(Substation::class, 'pop_id', 'pop_id');
     }
 }

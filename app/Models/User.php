@@ -72,4 +72,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Document::class, 'user_id', 'user_id');
     }
+
+    public function hasPermission(string $permission): bool
+{
+    if (!$this->role) {
+        return false;
+    }
+    
+    return $this->role->permissions()
+        ->where('permission_name', $permission)
+        ->exists();
+}
 }

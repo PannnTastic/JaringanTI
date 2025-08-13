@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -17,12 +18,16 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        Role::insert([
-            ['role_name' => 'Admin', 'role_status' => 1],
-        ]);
+        // Role::insert([
+        //     ['role_name' => 'Admin', 'role_status' => 1],
+        // ]);
 
-        User::insert([
-            ['name' => 'Admin User', 'email' => 'admin@example.com', 'password' => Hash::make('password'), 'role_id' => 1],
-        ]);
+        // User::insert([
+        //     ['name' => 'Admin User', 'email' => 'admin@example.com', 'password' => Hash::make('password'), 'role_id' => 1],
+        // ]);
+        // Seed permissions
+
+        
+
     }
 }

@@ -93,4 +93,13 @@ class VendorResource extends Resource
             'edit' => Pages\EditVendor::route('/{record}/edit'),
         ];
     }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('vendors');
+    }
+
+    public static function canViewAny(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('vendors');
+    }
 }

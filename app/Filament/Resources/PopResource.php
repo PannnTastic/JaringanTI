@@ -93,4 +93,13 @@ class PopResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('pops');
+    }
+
+    public static function canViewAny(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('pops');
+    }
 }

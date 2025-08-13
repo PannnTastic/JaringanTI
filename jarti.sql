@@ -19,6 +19,22 @@
 CREATE DATABASE IF NOT EXISTS `jarti` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `jarti`;
 
+-- Dumping structure for table jarti.budgets
+CREATE TABLE IF NOT EXISTS `budgets` (
+  `budget_id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `budget_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `budget_wbs` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `budget_nilai` decimal(10,2) NOT NULL,
+  `budget_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`budget_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table jarti.budgets: ~0 rows (approximately)
+DELETE FROM `budgets`;
+
 -- Dumping structure for table jarti.cache
 CREATE TABLE IF NOT EXISTS `cache` (
   `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -30,8 +46,8 @@ CREATE TABLE IF NOT EXISTS `cache` (
 -- Dumping data for table jarti.cache: ~2 rows (approximately)
 DELETE FROM `cache`;
 INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
-	('laravel_cache_livewire-rate-limiter:a17961fa74e9275d529f489537f179c05d50c2f3', 'i:1;', 1754965120),
-	('laravel_cache_livewire-rate-limiter:a17961fa74e9275d529f489537f179c05d50c2f3:timer', 'i:1754965120;', 1754965120);
+	('laravel_cache_livewire-rate-limiter:a17961fa74e9275d529f489537f179c05d50c2f3', 'i:1;', 1755057138),
+	('laravel_cache_livewire-rate-limiter:a17961fa74e9275d529f489537f179c05d50c2f3:timer', 'i:1755057138;', 1755057138);
 
 -- Dumping structure for table jarti.cache_locks
 CREATE TABLE IF NOT EXISTS `cache_locks` (
@@ -43,6 +59,24 @@ CREATE TABLE IF NOT EXISTS `cache_locks` (
 
 -- Dumping data for table jarti.cache_locks: ~0 rows (approximately)
 DELETE FROM `cache_locks`;
+
+-- Dumping structure for table jarti.documents
+CREATE TABLE IF NOT EXISTS `documents` (
+  `doc_id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `doc_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `doc_file` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `doc_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`doc_id`),
+  KEY `documents_user_id_foreign` (`user_id`),
+  CONSTRAINT `documents_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table jarti.documents: ~0 rows (approximately)
+DELETE FROM `documents`;
 
 -- Dumping structure for table jarti.failed_jobs
 CREATE TABLE IF NOT EXISTS `failed_jobs` (
@@ -59,36 +93,6 @@ CREATE TABLE IF NOT EXISTS `failed_jobs` (
 
 -- Dumping data for table jarti.failed_jobs: ~0 rows (approximately)
 DELETE FROM `failed_jobs`;
-
--- Dumping structure for table jarti.gardus
-CREATE TABLE IF NOT EXISTS `gardus` (
-  `gardus_id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `gardu_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_feeder` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_motorized` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_jarkom` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_proritas` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_fo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_pop` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_terdekat` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_kabel_fa` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_kabel_fig` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_petik_core` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_pekerjaan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_rab` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardu_perizinan` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `gardus_status` tinyint(1) NOT NULL DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL,
-  `user_id` bigint unsigned NOT NULL,
-  PRIMARY KEY (`gardus_id`),
-  KEY `gardus_user_id_foreign` (`user_id`),
-  CONSTRAINT `gardus_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Dumping data for table jarti.gardus: ~0 rows (approximately)
-DELETE FROM `gardus`;
 
 -- Dumping structure for table jarti.jobs
 CREATE TABLE IF NOT EXISTS `jobs` (
@@ -130,9 +134,9 @@ CREATE TABLE IF NOT EXISTS `migrations` (
   `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table jarti.migrations: ~7 rows (approximately)
+-- Dumping data for table jarti.migrations: ~8 rows (approximately)
 DELETE FROM `migrations`;
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 	(1, '0001_01_01_000001_create_cache_table', 1),
@@ -140,8 +144,12 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 	(3, '2025_08_11_053022_create_roles_table', 1),
 	(4, '2025_08_11_053023_create_users_table', 1),
 	(5, '2025_08_11_064309_create_vendors_table', 2),
-	(6, '2025_08_11_064802_create_gardus_table', 3),
-	(7, '2025_08_11_074321_create_pops_table', 4);
+	(12, '2025_08_11_074321_create_pops_table', 3),
+	(13, '2025_08_12_072449_create_documents_table', 3),
+	(14, '2025_08_12_072558_create_budgets_table', 3),
+	(15, '2025_08_13_013305_create_permissions_table', 3),
+	(16, '2025_08_13_013824_create_role_permissions_table', 3),
+	(17, '2025_08_13_021020_create_substations_table', 3);
 
 -- Dumping structure for table jarti.password_reset_tokens
 CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
@@ -154,6 +162,27 @@ CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
 -- Dumping data for table jarti.password_reset_tokens: ~0 rows (approximately)
 DELETE FROM `password_reset_tokens`;
 
+-- Dumping structure for table jarti.permissions
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `permission_id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `permission_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`permission_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table jarti.permissions: ~7 rows (approximately)
+DELETE FROM `permissions`;
+INSERT INTO `permissions` (`permission_id`, `permission_name`, `created_at`, `updated_at`, `deleted_at`) VALUES
+	(1, 'documents', NULL, NULL, NULL),
+	(2, 'users', NULL, NULL, NULL),
+	(3, 'vendors', NULL, NULL, NULL),
+	(4, 'pops', NULL, NULL, NULL),
+	(5, 'budgets', NULL, NULL, NULL),
+	(6, 'substations', NULL, NULL, NULL),
+	(7, 'roles', NULL, NULL, NULL);
+
 -- Dumping structure for table jarti.pops
 CREATE TABLE IF NOT EXISTS `pops` (
   `pop_id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -163,34 +192,12 @@ CREATE TABLE IF NOT EXISTS `pops` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`pop_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table jarti.pops: ~23 rows (approximately)
+-- Dumping data for table jarti.pops: ~0 rows (approximately)
 DELETE FROM `pops`;
 INSERT INTO `pops` (`pop_id`, `pop_name`, `pop_status`, `created_at`, `updated_at`, `deleted_at`) VALUES
-	(1, 'BALOI', 1, '2025-08-11 19:41:55', '2025-08-11 19:41:55', NULL),
-	(2, 'SBU', 1, '2025-08-11 19:42:03', '2025-08-11 19:42:03', NULL),
-	(3, 'BATU BESAR', 1, '2025-08-11 19:42:52', '2025-08-11 20:05:31', NULL),
-	(4, 'RAJAWALI', 1, '2025-08-11 19:43:02', '2025-08-11 19:43:46', NULL),
-	(5, 'OMA BTS', 1, '2025-08-11 19:43:07', '2025-08-11 19:45:48', NULL),
-	(6, 'NONGSA', 1, '2025-08-11 19:43:13', '2025-08-11 19:45:53', NULL),
-	(7, 'KABIL', 1, '2025-08-11 19:43:19', '2025-08-11 19:45:57', NULL),
-	(8, 'TANJUNG KASAM', 1, '2025-08-11 19:43:26', '2025-08-11 19:46:01', NULL),
-	(9, 'MUKA KUNING', 1, '2025-08-11 19:43:38', '2025-08-11 19:46:06', NULL),
-	(10, 'PANARAN', 1, '2025-08-11 19:47:54', '2025-08-11 19:48:07', NULL),
-	(11, 'KAV SERAYA', 1, '2025-08-11 19:48:48', '2025-08-11 19:48:48', NULL),
-	(12, 'BATU AJI', 1, '2025-08-11 19:48:55', '2025-08-11 19:48:55', NULL),
-	(13, 'TANJUNG UNCANG', 1, '2025-08-11 19:49:04', '2025-08-11 19:49:04', NULL),
-	(14, 'SAGUNGLUNG', 1, '2025-08-11 19:49:13', '2025-08-11 19:49:13', NULL),
-	(15, 'SEI HARAPAN', 1, '2025-08-11 19:49:21', '2025-08-11 19:49:21', NULL),
-	(16, 'TIBAN', 1, '2025-08-11 19:49:31', '2025-08-11 19:49:31', NULL),
-	(17, 'NAGOYA', 1, '2025-08-11 19:49:35', '2025-08-11 19:49:35', NULL),
-	(18, 'WIRAMUSTIKA', 1, '2025-08-11 20:03:50', '2025-08-11 20:03:50', NULL),
-	(19, 'MARINA PARK', 1, '2025-08-11 20:03:58', '2025-08-11 20:03:58', NULL),
-	(20, 'BATU AMPAR', 1, '2025-08-11 20:04:06', '2025-08-11 20:04:06', NULL),
-	(21, 'BENGKONG JAYA', 1, '2025-08-11 20:04:15', '2025-08-11 20:04:15', NULL),
-	(22, 'SENGKUANG', 1, '2025-08-11 20:04:26', '2025-08-11 20:04:26', NULL),
-	(23, 'BATAM CENTER', 1, '2025-08-11 20:04:51', '2025-08-11 20:04:51', NULL);
+	(1, 'MUKA KUNING', 1, '2025-08-12 20:46:40', '2025-08-12 20:46:40', NULL);
 
 -- Dumping structure for table jarti.roles
 CREATE TABLE IF NOT EXISTS `roles` (
@@ -213,6 +220,33 @@ INSERT INTO `roles` (`role_id`, `role_name`, `role_status`, `created_at`, `updat
 	(5, 'Infra Manager', 1, '2025-08-10 23:41:10', '2025-08-10 23:41:10', NULL),
 	(6, 'Senior Manager', 1, '2025-08-10 23:41:18', '2025-08-11 18:28:53', NULL);
 
+-- Dumping structure for table jarti.role_permissions
+CREATE TABLE IF NOT EXISTS `role_permissions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `role_id` bigint unsigned NOT NULL,
+  `permission_id` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `role_permissions_role_id_permission_id_unique` (`role_id`,`permission_id`),
+  KEY `role_permissions_permission_id_foreign` (`permission_id`),
+  CONSTRAINT `role_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`) ON DELETE CASCADE,
+  CONSTRAINT `role_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table jarti.role_permissions: ~9 rows (approximately)
+DELETE FROM `role_permissions`;
+INSERT INTO `role_permissions` (`id`, `role_id`, `permission_id`, `created_at`, `updated_at`) VALUES
+	(1, 6, 1, NULL, NULL),
+	(2, 1, 1, NULL, NULL),
+	(3, 1, 2, NULL, NULL),
+	(4, 1, 3, NULL, NULL),
+	(5, 1, 4, NULL, NULL),
+	(6, 1, 5, NULL, NULL),
+	(7, 1, 6, NULL, NULL),
+	(8, 1, 7, NULL, NULL),
+	(9, 2, 6, NULL, NULL);
+
 -- Dumping structure for table jarti.sessions
 CREATE TABLE IF NOT EXISTS `sessions` (
   `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -226,19 +260,44 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   KEY `sessions_last_activity_index` (`last_activity`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table jarti.sessions: ~10 rows (approximately)
+-- Dumping data for table jarti.sessions: ~14 rows (approximately)
 DELETE FROM `sessions`;
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-	('bffZSSLumD69oES9BnHgzxLlQn1gamP4Pp8pgm0x', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiZ3h0Tmw3SzY5WU1ZQjZqQ0xLcWtkTTFmQ0FKNVk4R2QxOGMyeXRDZiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly9qYXJ0aS50ZXN0Lz9oZXJkPXByZXZpZXciO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1754963294),
-	('CI0rUmVUeFXpjUrMn80X3rCI4BOypxSxMvlnBHVs', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiOHY3T0NRTnhQU29mOG9aQzlhNlZHNlNpbm9FT1dCeGlGSm02emRLdCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly9qYXJ0aS50ZXN0Lz9oZXJkPXByZXZpZXciO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1754963131),
-	('EiU05NXDqTlytHOjGMEs1Ek1AQDm5JQ6Y7CxLVe2', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoibW1vWTJuT3hGVHBCaDZlVGRQTVd1NGp6WEZ4ZVZrWTlLcURJQlZ3bSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mjk6Imh0dHA6Ly9qYXJ0aS50ZXN0L2FkbWluL2xvZ2luIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1754963295),
-	('Ho3qeLBVHzFGv4yNMiGhod4RpXFqlNcPCYq1eLvH', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiM05DVjduaUQ3Q2ZGZFUzVGhCdU1Ca3Y3QXp0TmlObkpZQ2FaQ3U3UyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mjg6Imh0dHA6Ly9qYXJ0aS50ZXN0L2FkbWluL3BvcHMiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO3M6MTc6InBhc3N3b3JkX2hhc2hfd2ViIjtzOjYwOiIkMnkkMTIkV2lnVHpqWnNKVHJlN3d6YXF5QUoxZTk5ZlRIRzlWRkhabkl0U0FuZGxWdHdGVEpxZ2dJR2UiO3M6ODoiZmlsYW1lbnQiO2E6MDp7fX0=', 1754967963),
-	('iCfbyp68ddh99H4F93IIWiMJf49f9h7c3Appaz0T', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoicDFZUDBoNmtFNWFzYUs0VTFTQUg3cTlLc09DaHNCRjF2UjRjWHJzaCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly9qYXJ0aS50ZXN0Lz9oZXJkPXByZXZpZXciO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1754963225),
-	('IcNtDfxrzqyluahOLCEVmWXpBaTEgnIOAOm0O8Sl', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiajhpMGpMc3FyR2RFTXBnT0FlOUZ1ZmhCTVRTWkJUaGg0cE5SY21qVSI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czoyMzoiaHR0cDovL2phcnRpLnRlc3QvYWRtaW4iO31zOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyMzoiaHR0cDovL2phcnRpLnRlc3QvYWRtaW4iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1754963295),
-	('lzUZKOYJQyhPgx2aIbLm4XWoeia1SM52xHjC54Td', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiSGpUUWJMeWtCYWdDVWhHYzROQk5razg2Zkx5aGRxM1F2ZGxNMVJJTyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mjk6Imh0dHA6Ly9qYXJ0aS50ZXN0L2FkbWluL2xvZ2luIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1754963225),
-	('R6BSyEORp8TK6dycxwJfA2Fg3GAexpzbBA0y2oy3', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiSjJXN0tLN1V3MGJDNlpWOW4yNHlIdTY4MmV2N2FtUXBqOTE1UWZmWCI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czoyMzoiaHR0cDovL2phcnRpLnRlc3QvYWRtaW4iO31zOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyMzoiaHR0cDovL2phcnRpLnRlc3QvYWRtaW4iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1754963225),
-	('Shd4wFE5H986pcaqKqtLlIzfrShjjUCa2nM81uSu', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoib0JFdk5LaTlsUnU2cnhtT3JJMWFxMkVJb0l6eUpjdDVPc0RPbjZ2MSI7czozOiJ1cmwiO2E6MTp7czo4OiJpbnRlbmRlZCI7czoyMzoiaHR0cDovL2phcnRpLnRlc3QvYWRtaW4iO31zOjk6Il9wcmV2aW91cyI7YToxOntzOjM6InVybCI7czoyMzoiaHR0cDovL2phcnRpLnRlc3QvYWRtaW4iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19', 1754963131),
-	('veyo8S3C5n1ZFOhC8tcnMaEAQTYA3f1pkyh3lNC8', NULL, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Herd/1.21.1 Chrome/120.0.6099.291 Electron/28.2.5 Safari/537.36', 'YTozOntzOjY6Il90b2tlbiI7czo0MDoiRlhnS3huWlRFVnFwUTlFRGxWSERVdGY0Z0ZXMjJ1SGN3eGlEaXloUCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mjk6Imh0dHA6Ly9qYXJ0aS50ZXN0L2FkbWluL2xvZ2luIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319fQ==', 1754963132);
+	('ZGMBAY6o7Ri3oNj3oz9KKb5FGVS3azw05KVmrmi1', 10, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiejlPMGFwZE9FMEJMc05DY2pxV0xraGlRZ3FUTXZrNVJDTTlxVXJWZCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly9qYXJ0aS50ZXN0L2FkbWluL3N1YnN0YXRpb25zIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTA7czoxNzoicGFzc3dvcmRfaGFzaF93ZWIiO3M6NjA6IiQyeSQxMiRUdHpWZGkyc2xObXZYalloc3RYajIuQkN3aDV2MUQ1RDV1WEJ5bFlHUzdWMnZRR0V4L05iUyI7fQ==', 1755057080);
+
+-- Dumping structure for table jarti.substations
+CREATE TABLE IF NOT EXISTS `substations` (
+  `substation_id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `substation_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_feeder` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_motorized` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_jarkom` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_priority` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_fo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_terdekat` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_cable_fa` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_cable_fig` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_petik_core` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_work` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_rab` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_licensing` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `substation_status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `pop_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`substation_id`),
+  KEY `substations_user_id_foreign` (`user_id`),
+  KEY `substations_pop_id_foreign` (`pop_id`),
+  CONSTRAINT `substations_pop_id_foreign` FOREIGN KEY (`pop_id`) REFERENCES `pops` (`pop_id`) ON DELETE CASCADE,
+  CONSTRAINT `substations_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table jarti.substations: ~0 rows (approximately)
+DELETE FROM `substations`;
+INSERT INTO `substations` (`substation_id`, `substation_name`, `substation_feeder`, `substation_motorized`, `substation_jarkom`, `substation_priority`, `substation_fo`, `substation_terdekat`, `substation_cable_fa`, `substation_cable_fig`, `substation_petik_core`, `substation_work`, `substation_rab`, `substation_licensing`, `substation_status`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `pop_id`) VALUES
+	(1, 'a', 'a', 'a', NULL, '1', 'Survey', '-', '0', '0', 'a', 'a', 'a', 'a', 0, '2025-08-12 20:50:36', '2025-08-12 20:50:59', NULL, 7, 1);
 
 -- Dumping structure for table jarti.users
 CREATE TABLE IF NOT EXISTS `users` (
@@ -257,17 +316,21 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `users_email_unique` (`email`),
   KEY `users_role_id_foreign` (`role_id`),
   CONSTRAINT `users_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table jarti.users: ~6 rows (approximately)
 DELETE FROM `users`;
 INSERT INTO `users` (`user_id`, `name`, `email`, `email_verified_at`, `password`, `status`, `role_id`, `remember_token`, `created_at`, `updated_at`, `deleted_at`) VALUES
-	(1, 'Admin User', 'admin@example.com', NULL, '$2y$12$WigTzjZsJTre7wzaqyAJ1e99fTHG9VFHZnItSAndlVtwFTJqggIGe', 1, 1, 'pGeZla08mERrdq9UTI82vz6vWzPGviiyzoQxzm3VXuDuql9jUfnV0aG7voSi', NULL, NULL, NULL),
-	(2, 'Aktivasi', 'aktivasi@mail.com', NULL, '$2y$12$NF27i/hSWs7uaHIXU9IMn.qpB9rzyzjSpJkp1gKgMZCVn64laLo1q', 1, 2, NULL, '2025-08-10 23:41:52', '2025-08-10 23:41:52', NULL),
+	(1, 'Admin User', 'admin@example.com', NULL, '$2y$12$WigTzjZsJTre7wzaqyAJ1e99fTHG9VFHZnItSAndlVtwFTJqggIGe', 1, 1, 'YCOIVzb4Hmm0vXOku6X7wHeYMcbaXqshZLgQyyvzHiK2AscfIsfxHIMBINon', NULL, '2025-08-12 20:35:45', NULL),
+	(2, 'Aktivasi', 'aktivasi@mail.com', NULL, '$2y$12$b9fjsDXCxadYQKxquMeaWu9v9ttP33YJgGMEO1Z2AGBsy8CCYeS5y', 1, 2, NULL, '2025-08-10 23:41:52', '2025-08-12 20:03:53', NULL),
 	(3, 'Staff IT Network', 'sitnetwork@mail.com', NULL, '$2y$12$pgSddfRn7H32cLeG0ryn8e.KIjUdDsdulaZbo5G9cAB11X0pp2cd.', 1, 3, NULL, '2025-08-11 00:08:48', '2025-08-11 00:08:48', NULL),
 	(4, 'Asisten Manajer Network', 'asmanetwork@mail.com', NULL, '$2y$12$SRNef4nRj45G/j7H5IIWYO7V.njGrUjXzVe4Q43Bak8agkL9Js65O', 0, 4, NULL, '2025-08-11 00:09:53', '2025-08-11 00:09:53', NULL),
 	(5, 'Infra Manager', 'inframanager@mail.com', NULL, '$2y$12$8LgBaUVs5eWtJw2f7DQNKufH4odV.fkxOG/hpgV6m1gosFMI/.Fku', 0, 5, NULL, '2025-08-11 00:10:28', '2025-08-11 18:37:11', NULL),
-	(6, 'Senior Manager', 'Senior.Manager@mail.com', NULL, '$2y$12$1NZqKHPkxnHCFb7FlcXzve7CX.tca76Sela9IsUSyGGeYEkY1JtX6', 1, 6, NULL, '2025-08-11 00:12:13', '2025-08-11 18:42:09', NULL);
+	(6, 'Senior Manager', 'Senior.Manager@mail.com', NULL, '$2y$12$zz3KDQlZqOaQUQLnRk4cNuBy8EhMi2w41Lbu/IIe64V3oApYaJsp.', 1, 6, NULL, '2025-08-11 00:12:13', '2025-08-12 20:38:58', NULL),
+	(7, 'Riska', 'admininfra1@plnbatam.com', NULL, '$2y$12$A8M0qPJbH5NyNRcpeGx5ou9Hpk/MZqiDJ3yYEE3j0LjWeU.nJqWDK', 1, 1, NULL, '2025-08-12 20:40:55', '2025-08-12 20:40:55', NULL),
+	(8, 'April', 'antoniapril@gmail.com', NULL, '$2y$12$Bj6BdwZ0eKKPDT57lswc6eILZrVaZNyYG91hsFqfVQlWjZzp.8Lfm', 1, 2, NULL, '2025-08-12 20:41:26', '2025-08-12 20:41:26', NULL),
+	(9, 'Tarsius', 'tarsiusderbyanto@gmail.com', NULL, '$2y$12$5hHT812H/mriLfSkYW80pO/elIEROuRovAPIZkuZ0GeaSC7slRH7.', 1, 2, NULL, '2025-08-12 20:42:05', '2025-08-12 20:42:05', NULL),
+	(10, 'Wawan', 'darel.darmawan@gmail.com', NULL, '$2y$12$TtzVdi2slNmvXjYhstXj2.BCwh5v1D5D5uXBylYGS7V2vQGEx/NbS', 1, 2, NULL, '2025-08-12 20:42:26', '2025-08-12 20:42:26', NULL);
 
 -- Dumping structure for table jarti.vendors
 CREATE TABLE IF NOT EXISTS `vendors` (

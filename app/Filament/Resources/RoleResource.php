@@ -5,10 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RoleResource\Pages;
 use App\Filament\Resources\RoleResource\RelationManagers;
 use App\Models\Role;
+use App\Models\Permission;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,9 +31,33 @@ class RoleResource extends Resource
                     ->label('Role')
                     ->required()
                     ->maxLength(255),
+                    
                 Forms\Components\Toggle::make('role_status')
                     ->label('Status Role')
+                    ->default(true)
                     ->required(),
+
+                Forms\Components\Section::make('Permissions')
+                    ->description('Pilih menu yang dapat diakses oleh role ini')
+                    ->schema([
+                        Forms\Components\CheckboxList::make('permissions')
+                            ->label('Menu Access')
+                            ->relationship('permissions', 'permission_name')
+                            ->options([
+                                '1' => 'Documents',
+                                '2' => 'Users',
+                                '3' => 'Vendors',
+                                '4' => 'Pops',
+                                '5' => 'Budgets',
+                                '6' => 'Substations',
+                                '7' => 'Roles'
+                            ])
+                            ->columns(2)
+                            ->gridDirection('row')
+                            ->bulkToggleable()
+                    ])
+                    ->collapsible()
+                    ->persistCollapsed()
             ]);
     }
 
@@ -45,6 +71,8 @@ class RoleResource extends Resource
                 Tables\Columns\IconColumn::make('role_status')
                     ->label('Status Role')
                     ->boolean(),
+                TextColumn::make('permissions.permission_name')
+                    ->label('Permissions'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -93,5 +121,14 @@ class RoleResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('roles');
+    }
+
+    public static function canViewAny(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('roles');
     }
 }

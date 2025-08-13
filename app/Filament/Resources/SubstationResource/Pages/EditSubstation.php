@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\GarduResource\Pages;
+namespace App\Filament\Resources\SubstationResource\Pages;
 
-use App\Filament\Resources\GarduResource;
+use App\Filament\Resources\SubstationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditGardu extends EditRecord
+class EditSubstation extends EditRecord
 {
-    protected static string $resource = GarduResource::class;
+    protected static string $resource = SubstationResource::class;
 
     protected function getHeaderActions(): array
     {

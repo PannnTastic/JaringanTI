@@ -2,11 +2,12 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\User;
-use App\Models\Vendor;
-use App\Models\Budget;
-use App\Models\Gardu;
 use App\Models\Pop;
+use App\Models\User;
+use App\Models\Gardu;
+use App\Models\Budget;
+use App\Models\Vendor;
+use App\Models\Substation;
 use Filament\Widgets\ChartWidget;
 
 class UserVendorChart extends ChartWidget
@@ -25,7 +26,7 @@ class UserVendorChart extends ChartWidget
                         User::count(),
                         Vendor::count(),
                         Budget::count(),
-                        Gardu::count(),
+                        Substation::count(),
                         Pop::count(),
                     ],
                     'backgroundColor' => [

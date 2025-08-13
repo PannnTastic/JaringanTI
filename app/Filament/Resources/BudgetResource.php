@@ -126,6 +126,15 @@ class BudgetResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('budgets');
+    }
+
+    public static function canViewAny(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('budgets');
+    }
 
     
 }
