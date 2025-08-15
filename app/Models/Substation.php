@@ -24,4 +24,8 @@ class Substation extends Model
     {
         return $this->belongsTo(Pop::class, 'pop_id', 'pop_id');
     }
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'substation_id', 'substation_id');
+    }
 }

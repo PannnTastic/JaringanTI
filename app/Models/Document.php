@@ -19,5 +19,9 @@ class Document extends Model
         return $this->belongsTo(User::class,'user_id');
     
     }
+
+    public function substations() {
+        return $this->belongsTo(Substation::class, 'substation_id', 'substation_id');
+    }
 }
 

@@ -28,10 +28,14 @@ return new class extends Migration
             $table->string('substation_rab')->nullable();
             $table->string('substation_licensing')->nullable();
             $table->boolean('substation_status')->default(1);
+            // bulan
+            $table->enum('bulan', ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'])->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
             $table->foreignId('pop_id')->constrained('pops', 'pop_id')->onDelete('cascade');
+            // $table->foreignId('doc_id')->constrained('documents', 'doc_id')->onDelete('cascade');
+
         }); 
     }
 

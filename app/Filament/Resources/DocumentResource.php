@@ -15,6 +15,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use App\Filament\Resources\DocumentResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\DocumentResource\RelationManagers;
+use Filament\Tables\Columns\TextColumn;
 
 class DocumentResource extends Resource
 {
@@ -40,6 +41,7 @@ class DocumentResource extends Resource
                     ->dehydrated()
                     ->required()
                     ->relationship('users','name'),
+                    
                 Forms\Components\FileUpload::make('doc_file')
                     ->label('File Dokumen')
                     ->directory('documents')
@@ -53,6 +55,8 @@ class DocumentResource extends Resource
                         'application/msword',
                     ])
                     ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX. Maksimal 2MB'),
+
+                
             ]);
     }
 
@@ -85,6 +89,10 @@ class DocumentResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('users.name')
                     ->label('Nama User')
+                    ->sortable(),
+                TextColumn::make('substations.substation_name')
+                    ->label('Substation')
+                    ->searchable()
                     ->sortable(),
             ])
             ->filters([

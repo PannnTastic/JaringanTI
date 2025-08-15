@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable
@@ -63,10 +64,7 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
 
-    public function gardus()
-    {
-        return $this->hasMany(Gardu::class); 
-    }
+    
 
     public function documents()
     {
@@ -82,5 +80,31 @@ class User extends Authenticatable
     return $this->role->permissions()
         ->where('permission_name', $permission)
         ->exists();
-}
+    }
+   // app/Models/User.php
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->photo) {
+            return Storage::disk('public')->url($this->photo);
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random';
+
+    }
+
+    public function hasRole($roles): bool
+    {
+        // Jika tidak ada role, return false
+        if (!$this->role) {
+            return false;
+        }
+
+        // Jika parameter roles adalah array
+        if (is_array($roles)) {
+            return in_array($this->role->role_name, $roles);
+        }
+
+        // Jika parameter roles adalah string
+        return $this->role->role_name === $roles;
+    }
 }

@@ -11,14 +11,17 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Select;
 use function Livewire\Volt\dehydrate;
-use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\UserResource\Pages;
+use Filament\Forms\Components\Checkbox;
+use Filament\Tables\Columns\ImageColumn;
 
+use Filament\Forms\Components\FileUpload;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\TrashedFilter;
+use App\Filament\Resources\UserResource\Pages;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\UserResource\RelationManagers;
-use Filament\Forms\Components\Checkbox;
-use Filament\Tables\Filters\TrashedFilter;
+use Filament\Forms\Components\Tabs\Tab;
 
 class UserResource extends Resource
 {
@@ -65,7 +68,12 @@ class UserResource extends Resource
                     ->label('ID Role')
                     ->relationship('role', 'role_name')
                     ->reactive()
-                    ->required()
+                    ->required(),
+                    FileUpload::make('photo')
+                    ->label('Avatar')
+                    ->image()
+                    ->disk('public')
+                    ->directory('avatars')
                     
             ]);
     }
@@ -100,6 +108,11 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\ImageColumn::make('photo')
+                    ->label('Avatar')
+                    ->disk('public')
+                    
+                    
             ])
             ->filters([
                 TrashedFilter::make()
