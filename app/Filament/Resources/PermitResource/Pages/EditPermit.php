@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\PopResource\Pages;
+namespace App\Filament\Resources\PermitResource\Pages;
 
-use App\Filament\Resources\PopResource;
+use App\Filament\Resources\PermitResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditPop extends EditRecord
+class EditPermit extends EditRecord
 {
-    protected static string $resource = PopResource::class;
+    protected static string $resource = PermitResource::class;
 
     protected function getHeaderActions(): array
     {

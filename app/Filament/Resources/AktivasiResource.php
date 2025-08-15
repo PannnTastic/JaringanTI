@@ -31,7 +31,7 @@ class AktivasiResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-check-circle';
     
-    protected static ?string $navigationLabel = 'Aktivasi';
+    protected static ?string $navigationLabel = 'Aktivation';
     
     protected static ?string $modelLabel = 'Aktivasi';
     

@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('budgets', function (Blueprint $table) {
-            $table->id('budget_id');
-            $table->string('budget_name');
-            $table->string('budget_wbs');
-            $table->decimal('budget_nilai', 10, 2);
-            $table->boolean('budget_status')->default(0);
-            $table->string('budget_prk')->nullable();
+        Schema::create('permits', function (Blueprint $table) {
+            $table->id('permit_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
+            $table->foreignId('substation_id')->constrained('substations', 'substation_id');
+            $table->boolean('permit_status')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('budgets');
+        Schema::dropIfExists('permits');
     }
 };

@@ -107,4 +107,11 @@ class User extends Authenticatable
         // Jika parameter roles adalah string
         return $this->role->role_name === $roles;
     }
+
+    public function permits()
+    {
+        return $this->hasMany(Permit::class, 'user_id', 'user_id');
+    }
+
+    
 }

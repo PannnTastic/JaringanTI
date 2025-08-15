@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -19,6 +20,7 @@ class PopResource extends Resource
     protected static ?string $model = Pop::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-signal';
+    protected static ?string $navigationLabel = 'POP';
 
     public static function form(Form $form): Form
     {

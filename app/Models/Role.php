@@ -38,4 +38,9 @@ class Role extends Model
     {
         return $this->permissions()->where('permission_name', $permissionName)->exists();
     }
+
+    public function approvers()
+    {
+        return $this->belongsToMany(Permit::class, 'approvers', 'role_id', 'permit_id');
+    }
 }

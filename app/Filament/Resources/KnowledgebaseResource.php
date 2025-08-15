@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -38,6 +39,8 @@ class KnowledgebaseResource extends Resource
                 Forms\Components\RichEditor::make('kb_content')
                     ->label('Konten Knowledgebase')
                     ->required()
+                    ->fileAttachmentsDirectory('uploads') // folder di storage/app/public/uploads
+                    ->fileAttachmentsVisibility('public')
                     ->columnSpanFull(),
             ]);
     }
@@ -52,6 +55,10 @@ class KnowledgebaseResource extends Resource
                 Tables\Columns\IconColumn::make('kb_status')
                     ->label('Status Knowledgebase')
                     ->boolean(),
+                // Tables\Columns\TextColumn::make('kb_content')
+                //     ->label('Konten Knowledgebase')
+                //     ->searchable()
+                //     ->,
                 Tables\Columns\TextColumn::make('category.kbc_name')
                     ->label('Nama Knowledgebase Kategori')
                     ->searchable(),

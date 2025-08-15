@@ -15,6 +15,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use App\Filament\Resources\DocumentResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\DocumentResource\RelationManagers;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 
 class DocumentResource extends Resource
@@ -55,8 +56,7 @@ class DocumentResource extends Resource
                         'application/msword',
                     ])
                     ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX. Maksimal 2MB'),
-
-                
+               
             ]);
     }
 

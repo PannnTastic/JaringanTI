@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\BudgetResource\Pages;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 
@@ -30,23 +31,20 @@ class BudgetResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('budget_wbs')
                     ->label('WBS')
-                    ->prefix('Rp')
-                    ->required()
-                    ->numeric(),
+                    ->required(),
                 Forms\Components\TextInput::make('budget_nilai')
                     ->label('Nilai Anggaran')
                     ->prefix('Rp')
                     ->required()
                     ->numeric(),
-                Forms\Components\Select::make('budget_status')
+                Forms\Components\Toggle::make('budget_status')
                     ->label('Status Anggaran')
+                    ->default(false)
+                    ->required(),
+                Forms\Components\TextInput::make('budget_prk')
+                    ->label('PRK')
                     ->required()
-                    ->options([
-                        'terkontrak' => 'Terkontrak',
-                        'terbayar' => 'Terbayar',
-                        'progres' => 'Progres',
-                        'rencana' => 'Rencana'
-                    ]),
+                    ->maxLength(255),
             ]);
     }
 
@@ -59,19 +57,20 @@ class BudgetResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('budget_wbs')
                     ->label('WBS')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('budget_nilai')
                     ->label('Nilai Anggaran')
+                    ->prefix('Rp. ')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('budget_prk')
+                    ->label('PRK')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('budget_status')
                     ->label('Status Anggaran')
                     ->badge(fn ($record) => match ($record->budget_status) {
-                        'terkontrak' => 'success',
-                        'terbayar' => 'info',
-                        'progres' => 'warning',
-                        'rencana' => 'secondary',
+                        0 => 'Tidak Aktif',
+                        1 => 'Aktif',
                     })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
