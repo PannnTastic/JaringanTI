@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('approvers', function (Blueprint $table) {
             $table->foreignId('permit_id')->constrained('permits', 'permit_id');
-            $table->foreignId('user_id')->constrained('users', 'user_id');
+            $table->foreignId('role_id')->constrained('roles', 'role_id');
             $table->boolean('approver_status')->default(0);
             $table->dateTime('approved_at')->nullable();
             $table->timestamps();

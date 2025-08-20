@@ -206,9 +206,8 @@ class PermitResource extends Resource
                 Forms\Components\Select::make('substation_id')
                     ->label('Substation')
                     ->required()
-                    ->relationship('substations', 'substation_name')
-                    ->searchable(),
-                    
+                    ->relationship('substations', 'substation_name'),
+
                 Forms\Components\Toggle::make('permit_status')
                     ->label('Status Permit')
                     ->default(false)
@@ -426,7 +425,7 @@ class PermitResource extends Resource
                                       ->where('approvers.approver_status', 0);
                                 });
                                 
-                                // HARDCODE: Cek apakah memang giliran user
+                                
                                 $userRoleName = $userRole->role_name;
                                 if ($userRoleName === 'Staff IT Network') {
                                     // Staff selalu bisa approve jika belum approve

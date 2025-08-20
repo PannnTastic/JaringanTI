@@ -8,11 +8,10 @@ use App\Models\Budget;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
-
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\BudgetResource\Pages;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\TernaryFilter;
 
 
 class BudgetResource extends Resource
@@ -25,6 +24,20 @@ class BudgetResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('budget_year')
+                    ->label('Tahun')
+                    ->numeric()
+                    ->minValue(2025) // Tidak bisa kurang dari 2025
+                    ->default(2025)  // Default 2025
+                    ->required(),
+                Forms\Components\Select::make('budget_category')
+                    ->label('Kategori Anggaran')
+                    ->required()
+                    ->options([
+                        'Anggaran Investasi' => 'AI : Anggaran Investasi',
+                        'Anggaran Operasi' => 'AO : Anggaran Operasi',
+                        'Biaya Administrasi' => 'BA : Biaya Administrasi'
+                    ]),
                 Forms\Components\TextInput::make('budget_name')
                     ->label('Nama Anggaran')
                     ->required()
@@ -52,20 +65,28 @@ class BudgetResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('budget_name')
-                    ->label('Nama Anggaran')
-                    ->searchable(),
+                // tambah column
+                Tables\Columns\TextColumn::make('budget_year')
+                    ->label('Tahun')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('budget_category')
+                    ->label('Kategori Anggaran')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('budget_wbs')
                     ->label('WBS')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('budget_prk')
+                    ->label('PRK')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('budget_name')
+                    ->label('Nama Anggaran')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('budget_nilai')
                     ->label('Nilai Anggaran')
                     ->prefix('Rp. ')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('budget_prk')
-                    ->label('PRK')
-                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('budget_status')
                     ->label('Status Anggaran')
                     ->badge(fn ($record) => match ($record->budget_status) {
@@ -87,7 +108,19 @@ class BudgetResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+             Tables\Filters\TernaryFilter::make('budget_status')
+                ->label('Status')
+                ->trueLabel('Tampil (Aktif)')   // Teks untuk status true/1
+                ->falseLabel('Tersembunyi (Tidak Aktif)') // Teks untuk status false/0
+                ->queries(
+                    true: fn ($query) => $query->where('budget_status', true),
+                    false: fn ($query) => $query->where('budget_status', false),
+                )
+                // Baris ini membuat filter otomatis aktif menampilkan data yang statusnya 'true'
+                ->default(true),
+                
                 Tables\Filters\TrashedFilter::make()
+                
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

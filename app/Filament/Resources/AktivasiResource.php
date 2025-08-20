@@ -19,6 +19,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\AktivasiResource\Pages;
+use Filament\Tables\Actions\DeleteBulkAction;
+
 
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AktivasiResource\RelationManagers;
@@ -31,7 +33,7 @@ class AktivasiResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-check-circle';
     
-    protected static ?string $navigationLabel = 'Aktivation';
+    protected static ?string $navigationLabel = 'Activation';
     
     protected static ?string $modelLabel = 'Aktivasi';
     
@@ -99,8 +101,25 @@ class AktivasiResource extends Resource
                     ->multiple()
                     ->dehydrateStateUsing(fn ($state) => is_array($state) ? implode(',', $state) : $state),
 
+                    
+                Toggle::make('substation_status')
+                    ->label('Status Aktif')
+                    ->default(true),
 
-                    Repeater::make('documents')
+                Forms\Components\DatePicker::make('substation_periode')
+                    ->label('Periode')
+                    ->required()
+                    ->default(now()->format('Y-m-d')) // default format tanggal lengkap
+                    ->placeholder('Pilih tanggal')
+                    ->displayFormat('d-m-Y'), // tampilkan hari-bulan-tahun 
+                Select::make('user_id')
+                    ->label('User')
+                    ->default(auth()->id())
+                    ->relationship('users', 'name')
+                    ->disabled()
+                    ->dehydrated(),
+
+                 Repeater::make('documents')
                         ->relationship()
                         ->schema([
                         TextInput::make('doc_name')
@@ -127,35 +146,12 @@ class AktivasiResource extends Resource
                             ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX. Maksimal 2MB'),
                     ]),
 
-                    
-                Toggle::make('substation_status')
-                    ->label('Status Aktif')
-                    ->default(true),
-                    
-                Select::make('bulan')
-                    ->label('Bulan')
-                    ->options([
-                        'Januari' => 'Januari',
-                        'Februari' => 'Februari', 
-                        'Maret' => 'Maret',
-                        'April' => 'April',
-                        'Mei' => 'Mei',
-                        'Juni' => 'Juni',
-                        'Juli' => 'Juli',
-                        'Agustus' => 'Agustus',
-                        'September' => 'September',
-                        'Oktober' => 'Oktober',
-                        'November' => 'November',
-                        'Desember' => 'Desember',
-                    ])
-                    ->searchable(),
-                    
-                Select::make('user_id')
-                    ->label('User')
-                    ->default(auth()->id())
-                    ->relationship('users', 'name')
-                    ->disabled()
-                    ->dehydrated(),
+                    Forms\Components\RichEditor::make('substation_info')
+                ->label('Substation Info')
+                ->required()
+                ->fileAttachmentsDirectory('uploads')
+                ->fileAttachmentsVisibility('public')
+                ->columnSpanFull(),
             ]);
     }
 
@@ -193,7 +189,7 @@ class AktivasiResource extends Resource
                     ->label('Petik Core')
                     ->searchable(),
                 TextColumn::make('substation_work')
-                    ->label('Hari Kerja')
+                    ->label('Work Days')
                     ->searchable(),
                 TextColumn::make('substation_rab')
                     ->label('RAB')
@@ -208,9 +204,10 @@ class AktivasiResource extends Resource
                     ->trueColor('success')
                     ->falseColor('danger'),
                     
-                TextColumn::make('bulan')
-                    ->label('Bulan')
-                    ->badge(),
+                TextColumn::make('substation_periode')
+                    ->label('Periode')
+                    ->badge()
+                    ->date('F Y'),
                     
                 TextColumn::make('users.name')
                     ->label('User')
@@ -257,22 +254,7 @@ class AktivasiResource extends Resource
                         0 => 'Tidak Aktif',
                     ]),
                     
-                Tables\Filters\SelectFilter::make('bulan')
-                    ->label('Bulan')
-                    ->options([
-                        'Januari' => 'Januari',
-                        'Februari' => 'Februari', 
-                        'Maret' => 'Maret',
-                        'April' => 'April',
-                        'Mei' => 'Mei',
-                        'Juni' => 'Juni',
-                        'Juli' => 'Juli',
-                        'Agustus' => 'Agustus',
-                        'September' => 'September',
-                        'Oktober' => 'Oktober',
-                        'November' => 'November',
-                        'Desember' => 'Desember',
-                    ]),
+                
                 
             ])
             ->actions([

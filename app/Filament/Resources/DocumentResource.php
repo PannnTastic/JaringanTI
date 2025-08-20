@@ -9,14 +9,17 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 
+use Filament\Tables\Filters\SelectFilter;
+
+use App\Models\Role;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Filters\TrashedFilter;
 use App\Filament\Resources\DocumentResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\DocumentResource\RelationManagers;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
 
 class DocumentResource extends Resource
 {
@@ -95,10 +98,30 @@ class DocumentResource extends Resource
                     ->searchable()
                     ->sortable(),
             ])
-            ->filters([
-                TrashedFilter::make()
+            
 
+            ->filters([
+                TrashedFilter::make(),
+                SelectFilter::make('role')
+                    ->label('Role User')
+                    ->options(
+                        Role::pluck('role_name', 'role_id')->toArray()
+                    )
+                    ->default(function(){
+                        $role = Role::where('role_name', 'Aktivasi')->first();
+                        return $role ? $role->role_id : null;
+                    })
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['value'],
+                                fn (Builder $query, $value): Builder => $query->whereHas('users.role', function ($q) use ($value) {
+                                    $q->where('role_id', $value);
+                                }),
+                            );
+                    }),
             ])
+
             ->actions([
                 Tables\Actions\Action::make('download')
                     ->label('Download')
