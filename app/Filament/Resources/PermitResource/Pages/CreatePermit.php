@@ -12,7 +12,7 @@ class CreatePermit extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $roles = $this->data['roles'] ?? [];
+        $roles = $this->data['approver_roles'] ?? [];
 
         // Attach roles to permit dengan status awal 0 (belum disetujui)
         foreach ($roles as $roleId) {

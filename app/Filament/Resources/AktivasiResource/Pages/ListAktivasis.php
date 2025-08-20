@@ -15,9 +15,7 @@ class ListAktivasis extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
-                ->label('Tambah Aktivasi')
-                ->icon('heroicon-s-plus'),
+            
         ];
     }
 }

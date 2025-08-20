@@ -15,6 +15,17 @@ class Permit extends Model
 
     protected $guarded = [];
 
+    // Accessor untuk kompatibilitas dengan IDE
+    public function getUserIdAttribute($value)
+    {
+        return $value;
+    }
+
+    public function getPermitStatusAttribute($value)
+    {
+        return $value;
+    }
+
     public function users(){
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
@@ -27,6 +38,7 @@ class Permit extends Model
     public function approvers()
     {
         return $this->belongsToMany(Role::class, 'approvers','permit_id','role_id')
+            ->select(['roles.*']) // Explicit select untuk menghindari ambiguitas
             ->withPivot(['approver_status', 'approved_at'])
             ->withTimestamps();
     }

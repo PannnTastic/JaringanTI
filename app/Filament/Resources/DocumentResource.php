@@ -44,7 +44,7 @@ class DocumentResource extends Resource
                     ->disabled()
                     ->dehydrated()
                     ->required()
-                    ->relationship('users','name'),
+                    ->relationship('user','name'),
                     
                 Forms\Components\FileUpload::make('doc_file')
                     ->label('File Dokumen')
@@ -90,7 +90,7 @@ class DocumentResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('users.name')
+                Tables\Columns\TextColumn::make('user.name')
                     ->label('Nama User')
                     ->sortable(),
                 TextColumn::make('substations.substation_name')
@@ -115,7 +115,7 @@ class DocumentResource extends Resource
                         return $query
                             ->when(
                                 $data['value'],
-                                fn (Builder $query, $value): Builder => $query->whereHas('users.role', function ($q) use ($value) {
+                                fn (Builder $query, $value): Builder => $query->whereHas('user.role', function ($q) use ($value) {
                                     $q->where('role_id', $value);
                                 }),
                             );

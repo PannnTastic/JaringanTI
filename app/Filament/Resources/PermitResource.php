@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Filament\Resources\PermitResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PermitResource\RelationManagers;
@@ -200,7 +201,7 @@ class PermitResource extends Resource
             ->schema([
                 Forms\Components\Hidden::make('user_id')
                     ->default(function() {
-                        return Auth::user()?->user_id;
+                        return Auth::id();
                     }),
                     
                 Forms\Components\Select::make('substation_id')
@@ -214,14 +215,14 @@ class PermitResource extends Resource
                     ->disabled()
                     ->helperText('Status akan diubah setelah semua role menyetujui'),
                     
-                Forms\Components\Select::make('roles')
+                Forms\Components\Select::make('approver_roles')
                     ->label('Role Approver')
                     ->multiple()
-                    ->options(Role::whereIn('role_name', ['Admin','Staff IT Network', 'Asisten Manajer Network','Infra Manager'])
-                        ->pluck('role_name', 'role_id'))
+                    ->options(Role::whereIn('role_name', ['Staff IT Network', 'Asisten Manajer Network','Infra Manager'])
+                    ->pluck('role_name', 'role_id'))
                     ->required()
-                    ->dehydrated(false) // Tidak disimpan ke tabel permits
                     ->helperText('Pilih role yang harus menyetujui permit ini')
+                    ->dehydrated(false) // Mencegah field ini disimpan langsung ke database
             ]);
     }
 
@@ -268,7 +269,7 @@ class PermitResource extends Resource
                 Tables\Columns\TextColumn::make('next_approver')
                     ->label('Menunggu Approval')
                     ->getStateUsing(function (Permit $record) {
-                        if ($record->permit_status) {
+                        if ($record->getAttribute('permit_status')) {
                             return 'Selesai';
                         }
                         
@@ -277,7 +278,7 @@ class PermitResource extends Resource
                     })
                     ->badge()
                     ->color(function (Permit $record) {
-                        if ($record->permit_status) {
+                        if ($record->getAttribute('permit_status')) {
                             return 'success';
                         }
                         
@@ -288,15 +289,15 @@ class PermitResource extends Resource
                     ->label('Status Approval Saya')
                     ->getStateUsing(function (Permit $record) {
                         $user = Auth::user();
-                        $userRole = $user->role;
+                        $userRole = DB::table('roles')->where('role_id', $user->role_id)->first();
                         
                         // Jika user adalah admin
-                        if ($userRole && strtolower($userRole->role_name) === 'admin') {
+                        if ($userRole && strtolower($userRole->role_name) === 'administrator') {
                             return 'Admin (View Only)';
                         }
                         
                         // Jika user adalah pembuat permit
-                        if ($record->user_id == $user->user_id) {
+                        if ($record->getAttribute('user_id') == Auth::id()) {
                             return 'Pembuat Permit';
                         }
                         
@@ -326,15 +327,16 @@ class PermitResource extends Resource
                     ->badge()
                     ->color(function (Permit $record) {
                         $user = Auth::user();
-                        $userRole = $user->role;
+                        $roleId = $user->role_id ?? null;
+                        $userRole = $roleId ? DB::table('roles')->where('role_id', $roleId)->first() : null;
                         
                         // Jika user adalah admin
-                        if ($userRole && strtolower($userRole->role_name) === 'admin') {
+                        if ($userRole && strtolower($userRole->role_name) === 'administrator') {
                             return 'primary';
                         }
                         
                         // Jika user adalah pembuat permit
-                        if ($record->user_id == $user->user_id) {
+                        if ($record->getAttribute('user_id') == Auth::id()) {
                             return 'info';
                         }
                         
@@ -414,7 +416,7 @@ class PermitResource extends Resource
                         $user = Auth::user();
                         $userRole = $user->role;
                         
-                        if (!$userRole || !isset($data['value']) || strtolower($userRole->role_name) === 'admin') {
+                        if (!$userRole || !isset($data['value']) || strtolower($userRole->role_name) === 'administrator') {
                             return $query;
                         }
                         
@@ -575,21 +577,39 @@ class PermitResource extends Resource
     {
         $user = Auth::user();
         
+        if (!$user) {
+            return parent::getEloquentQuery()->where('permit_id', 0); // Return empty result if no user
+        }
+        
+        // Ambil ID user - gunakan attribute yang tersedia
+        $userId = $user->id ?? $user->user_id ?? null;
+        
+        if (!$userId) {
+            return parent::getEloquentQuery()->where('permit_id', 0);
+        }
+        
+        // Cek apakah user memiliki role Administrator
+        $userRole = DB::table('users')
+            ->join('roles', 'users.role_id', '=', 'roles.role_id')
+            ->where('users.user_id', $userId)
+            ->select('roles.role_name', 'roles.role_id')
+            ->first();
+        
+        // Administrator bisa melihat SEMUA permit tanpa batasan apapun
+        if ($userRole && strtolower($userRole->role_name) === 'administrator') {
+            return parent::getEloquentQuery(); // Tampilkan semua permit
+        }
+        
+        // Untuk user selain Administrator, filter berdasarkan permission
         return parent::getEloquentQuery()
-            ->where(function ($query) use ($user) {
-                // Admin bisa melihat semua permit
-                if ($user->role && strtolower($user->role->role_name) === 'admin') {
-                    // Admin melihat semua permit, tidak perlu filter
-                    return;
-                }
-                
+            ->where(function ($query) use ($userId, $userRole) {
                 // Tampilkan permit yang dibuat oleh user sendiri
-                $query->where('user_id', $user->user_id);
+                $query->where('user_id', $userId);
                 
                 // ATAU permit dimana user adalah approver (berdasarkan role)
-                if ($user->role) {
-                    $query->orWhereHas('approvers', function ($subQuery) use ($user) {
-                        $subQuery->where('approvers.role_id', $user->role->role_id);
+                if ($userRole) {
+                    $query->orWhereHas('approvers', function ($subQuery) use ($userRole) {
+                        $subQuery->where('approvers.role_id', $userRole->role_id);
                     });
                 }
             });

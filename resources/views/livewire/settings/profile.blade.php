@@ -55,7 +55,7 @@ new class extends Component {
     public function updatePhoto(): void
     {
         $validated = $this->validate([
-            'photo' => ['required', 'image', 'max:1024'], // max 1MB
+            'user_photo' => ['required', 'image', 'max:1024'], // max 1MB
         ]);
 
         $user = Auth::user();
@@ -67,7 +67,7 @@ new class extends Component {
         $path = $this->photo->store('profile-photos');
         
         $user->update([
-            'photo' => $path
+            'user_photo' => $path
         ]);
 
         $this->dispatch('photo-updated');

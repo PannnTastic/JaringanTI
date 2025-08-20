@@ -63,8 +63,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
-
-    
+    public function substations()
+    {
+        return $this->hasMany(Substation::class, 'user_id', 'user_id');
+    }
 
     public function documents()
     {
@@ -85,7 +87,7 @@ class User extends Authenticatable
     public function getAvatarUrlAttribute(): string
     {
         if ($this->photo) {
-            return Storage::disk('public')->url($this->photo);
+            return Storage::disk('public')->url($this->user_photo);
         }
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random';
@@ -111,6 +113,27 @@ class User extends Authenticatable
     public function permits()
     {
         return $this->hasMany(Permit::class, 'user_id', 'user_id');
+    }
+
+    // Accessor untuk kompatibilitas dengan IDE
+    public function getUserIdAttribute($value)
+    {
+        return $this->attributes['user_id'] ?? null;
+    }
+
+    public function getRoleIdAttribute($value)
+    {
+        return $this->attributes['role_id'] ?? null;
+    }
+
+    public function getRoleAttribute()
+    {
+        // Jika relation sudah di-load, gunakan itu. Jika tidak, load secara lazy
+        if ($this->relationLoaded('role')) {
+            return $this->getRelation('role');
+        }
+        
+        return $this->role()->first();
     }
 
     

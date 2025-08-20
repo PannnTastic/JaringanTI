@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use App\Models\Substation;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 use function Laravel\Prompts\select;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -40,22 +41,45 @@ class AktivasiResource extends Resource
     protected static ?string $pluralModelLabel = 'Aktivasi';
     protected static ?string $navigationGroup = 'Substation Management';
     
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        $user = Auth::user();
+        if ($user) {
+            // Untuk role "aktivasi", tampilkan:
+            // 1. Substation yang belum ada user_id (untuk diambil/diaktivasi)
+            // 2. Substation yang sudah diaktivasi oleh user ini (untuk diedit)
+            $userRole = \App\Models\User::with('role')->find(Auth::id());
+            if ($userRole && $userRole->role && strtolower($userRole->role->role_name) === 'aktivasi') {
+                $query->where(function($q) {
+                    $q->whereNull('user_id')
+                      ->orWhere('user_id', Auth::id());
+                });
+            } else {
+                // Role lain: hanya tampilkan yang sudah diaktivasi
+                $query->whereNotNull('user_id');
+            }
+        }
+        
+        return $query;
+    }
+    
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Select::make('substation_name')
-                    ->label('Pilih Substation')
-                    ->options(Substation::pluck('substation_name', 'substation_name'))
-                    ->searchable()
-                    ->required()
-                    ->placeholder('Pilih substation yang sudah ada'),
+                Forms\Components\TextInput::make('substation_name')
+                    ->label('Nama Substation')
+                    ->disabled()
+                    ->dehydrated()
+                    ->helperText('Ini adalah data substation yang akan diaktivasi/diedit'),
                 
                 Select::make('pop_id')
                     ->label('POP')
                     ->options(Pop::pluck('pop_name', 'pop_id'))
                     ->searchable()
-                    ->required(),
+                    ,
                 Select::make('substation_terdekat')
                     ->label('Terdekat')
                     ->options(Substation::pluck('substation_terdekat', 'substation_terdekat'))
@@ -108,16 +132,32 @@ class AktivasiResource extends Resource
 
                 Forms\Components\DatePicker::make('substation_periode')
                     ->label('Periode')
-                    ->required()
+                    
                     ->default(now()->format('Y-m-d')) // default format tanggal lengkap
                     ->placeholder('Pilih tanggal')
                     ->displayFormat('d-m-Y'), // tampilkan hari-bulan-tahun 
                 Select::make('user_id')
-                    ->label('User')
-                    ->default(auth()->id())
-                    ->relationship('users', 'name')
+                    ->label('User (Terakhir Edit)')
+                    ->options(\App\Models\User::pluck('name', 'user_id'))
                     ->disabled()
-                    ->dehydrated(),
+                    ->dehydrated()
+                    ->helperText('Menampilkan user yang terakhir mengedit data ini'),
+
+                Forms\Components\Placeholder::make('edit_info')
+                    ->label('Info Edit')
+                    ->content(function ($record) {
+                        if (!$record) {
+                            $currentUserId = Auth::id();
+                            $currentUserName = $currentUserId ? \App\Models\User::where('user_id', $currentUserId)->value('name') : null;
+                            return 'Data baru - akan diedit oleh: ' . ($currentUserName ?? 'Unknown');
+                        }
+                        
+                        $userName = \App\Models\User::where('user_id', $record->user_id)->value('name');
+                        $lastUpdate = $record->updated_at ? $record->updated_at->format('d/m/Y H:i') : '-';
+                        
+                        return 'Terakhir diedit oleh: ' . ($userName ?? 'Unknown') . ' pada ' . $lastUpdate;
+                    })
+                    ->columnSpanFull(),
 
                  Repeater::make('documents')
                         ->relationship()
@@ -126,11 +166,11 @@ class AktivasiResource extends Resource
                             ->label('Nama Dokumen'),
                         Select::make('user_id')
                             ->label('Nama User')
-                            ->default(auth()->id())
+                            ->default(Auth::id())
                             ->disabled()
                             ->dehydrated()
                             ->required()
-                            ->relationship('users','name'),
+                            ->options(\App\Models\User::pluck('name', 'user_id')),
                         FileUpload::make('doc_file')
                             ->label('File Dokumen')
                             ->directory('documents')
@@ -148,7 +188,7 @@ class AktivasiResource extends Resource
 
                     Forms\Components\RichEditor::make('substation_info')
                 ->label('Substation Info')
-                ->required()
+                
                 ->fileAttachmentsDirectory('uploads')
                 ->fileAttachmentsVisibility('public')
                 ->columnSpanFull(),
@@ -158,14 +198,18 @@ class AktivasiResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->modifyQueryUsing(function (Builder $query){
-            $user = auth()->user();
-            if ($user && $user->hasRole('Aktivasi')) {
-                $query->where('user_id', $user->user_id);
-            }
-            return $query;
-        })
             ->columns([
+                TextColumn::make('activation_status')
+                    ->label('Status Aktivasi')
+                    ->getStateUsing(function ($record) {
+                        return $record->user_id ? 'Sudah Diaktivasi' : 'Belum Diaktivasi';
+                    })
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Sudah Diaktivasi' => 'success',
+                        'Belum Diaktivasi' => 'warning',
+                    }),
+                    
                 TextColumn::make('substation_name')
                     ->label('Nama Substation')
                     ->searchable()
@@ -209,7 +253,7 @@ class AktivasiResource extends Resource
                     ->badge()
                     ->date('F Y'),
                     
-                TextColumn::make('users.name')
+                TextColumn::make('user.name')
                     ->label('User')
                     ->searchable(),
                     
@@ -258,8 +302,12 @@ class AktivasiResource extends Resource
                 
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->label('Lihat'),
+                Tables\Actions\EditAction::make()
+                    ->label('Aktivasi')
+                    ->color('success')
+                    ->icon('heroicon-s-check-circle'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -280,9 +328,9 @@ class AktivasiResource extends Resource
     {
         return [
             'index' => Pages\ListAktivasis::route('/'),
-            'create' => Pages\CreateAktivasi::route('/create'),
             'view' => Pages\ViewAktivasi::route('/{record}'),
             'edit' => Pages\EditAktivasi::route('/{record}/edit'),
+            // Tidak ada create page - hanya bisa edit substation yang sudah ada
         ];
     }
     

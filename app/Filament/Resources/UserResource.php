@@ -61,6 +61,31 @@ class UserResource extends Resource
                     )
                     ->dehydrated(fn ($state) => filled($state))
                     ->dehydrateStateUsing(fn ($state) => $state ? Hash::make($state) : null),
+                    Select::make('user_gender')
+                        ->label('Jenis Kelamin')
+                        ->options([
+                            'L' => 'Laki-laki',
+                            'P' => 'Perempuan',
+                        ])
+                        ->default('L')
+                        ->required(),
+                    Forms\Components\Textarea::make('user_address')
+                        ->label('Alamat')
+                        ->rows(3)
+                        ->maxLength(500)
+                        ->placeholder('Masukkan alamat lengkap'),
+                    Forms\Components\DatePicker::make('user_birthday')
+                        ->label('Tanggal Lahir')
+                        ->placeholder('Pilih tanggal lahir')
+                        ->displayFormat('d-m-Y')
+                        ->maxDate(now())
+                        ->required(),
+                    Select::make('user_marital')
+                        ->label('Status Pernikahan')
+                        ->options([
+                            'Menikah' => 'Menikah',
+                            'Belum Menikah' => 'Belum Menikah',
+                        ]),
                 Forms\Components\Toggle::make('status')
                     ->label('Status')
                     ->required(),
@@ -69,11 +94,11 @@ class UserResource extends Resource
                     ->relationship('role', 'role_name')
                     ->reactive()
                     ->required(),
-                    FileUpload::make('photo')
+                    FileUpload::make('user_photo')
                     ->label('Avatar')
                     ->image()
                     ->disk('public')
-                    ->directory('avatars')
+                    ->directory('avatars'),
                     
             ]);
     }
@@ -89,13 +114,11 @@ class UserResource extends Resource
                     ->label('Email')
                     ->searchable(),
                
-                Tables\Columns\IconColumn::make('status')
-                    ->label('Status')
-                    ->boolean(),
+                
                 Tables\Columns\TextColumn::make('role.role_name')
                     ->label('Role')
-                    
                     ->sortable(),
+                
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -108,7 +131,7 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\ImageColumn::make('photo')
+                Tables\Columns\ImageColumn::make('user_photo')
                     ->label('Avatar')
                     ->disk('public')
                     
