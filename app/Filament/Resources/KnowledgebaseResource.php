@@ -32,10 +32,10 @@ class KnowledgebaseResource extends Resource
                 Forms\Components\Toggle::make('kb_status')
                     ->label('Status Knowledgebase')
                     ->required(),
-                Forms\Components\Select::make('kbc_id')
+                Forms\Components\Select::make('field_id')
                     ->label('Kategori Knowledgebase')
                     ->required()
-                    ->relationship('category', 'kbc_name'),
+                    ->relationship('category', 'field_name'),
                 Forms\Components\RichEditor::make('kb_content')
                     ->label('Konten Knowledgebase')
                     ->required()
@@ -59,8 +59,8 @@ class KnowledgebaseResource extends Resource
                 //     ->label('Konten Knowledgebase')
                 //     ->searchable()
                 //     ->,
-                Tables\Columns\TextColumn::make('category.kbc_name')
-                    ->label('Nama Knowledgebase Kategori')
+                Tables\Columns\TextColumn::make('category.field_name')
+                    ->label('Nama Bidang')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

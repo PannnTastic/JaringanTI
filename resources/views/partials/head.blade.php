@@ -1,11 +1,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>{{ $title ?? config('app.name') }}</title>
 
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- Favicon Override -->
+<link rel="icon" type="image/x-icon" href="/img/favicon16x16.ico">
+<link rel="shortcut icon" type="image/x-icon" href="/img/favicon16x16.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/img/favicon16x16.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon32x32.ico">
+<link rel="apple-touch-icon" href="/img/favicon16x16.ico">
 
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />

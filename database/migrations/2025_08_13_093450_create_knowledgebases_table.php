@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('kb_status')->default(1);
             $table->timestamps();
             $table->softDeletes();
-            $table->foreignId('kbc_id')->constrained('knowledgebase_category')->references('kbc_id')->onDelete('cascade');
+            $table->foreignId('field_id')->constrained('field')->references('field_id')->onDelete('cascade');
         });
     }
 

@@ -19,7 +19,7 @@ class Knowledgebase extends Model
 
     public function category()
     {
-        return $this->belongsTo(Knowledgebase_category::class, 'kbc_id', 'kbc_id');
+        return $this->belongsTo(Field::class, 'field_id', 'field_id');
     }
 
 }

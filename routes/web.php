@@ -5,8 +5,9 @@ use Livewire\Volt\Volt;
 
 // Route::redirect('/', 'admin');
 
+// route untuk halaman knowledge berdasarkan kategori
 Route::get('/', function () {
-    $categories = \App\Models\Knowledgebase_category::with(['knowledgebase' => function($query) {
+    $categories = \App\Models\Field::with(['knowledgebase' => function($query) {
         $query->where('kb_status', 1)->orderBy('created_at', 'desc');
     }])->get();
     
@@ -14,13 +15,31 @@ Route::get('/', function () {
         ->where('kb_status', 1)
         ->orderBy('created_at', 'desc')
         ->get();
+    $apps = \App\Models\App::all(); // Ambil semua aplikasi
     
-    return view('kb', compact('categories', 'allKnowledge'));
+    return view('kb', compact('categories', 'allKnowledge', 'apps'));
 });
 
-// Route::get('/admin', function () {
-//     return view('kb');
-// });
+Route::get('/categories/{field:field_id}', function ($fieldId) {
+    $categories = \App\Models\Field::with(['knowledgebase' => function($query) {
+        $query->where('kb_status', 1)->orderBy('created_at', 'desc');
+    }])->get();
+    
+    $allKnowledge = \App\Models\Knowledgebase::with('category')
+        ->where('kb_status', 1)
+        ->where('field_id', $fieldId)
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+    return view('kbs', compact('categories', 'allKnowledge'));
+})->name('kbs');
+
+
+Route::get('/kb/{kb:kb_id}', function ($kbId) {
+    $kb = \App\Models\Knowledgebase::with('category')->findOrFail($kbId);
+    return view('single-kb', compact('kb'));
+})->name('single-kb');
+
 
 
 
