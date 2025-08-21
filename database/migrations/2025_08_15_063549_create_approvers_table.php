@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained('roles', 'role_id');
             $table->boolean('approver_status')->default(0);
             $table->dateTime('approved_at')->nullable();
+            $table->string('rejection_reason')->nullable();
             $table->timestamps();
         });
     }

@@ -11,6 +11,7 @@ use Filament\Enums\ThemeMode;
 use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Widgets\LatestActivity;
@@ -62,6 +63,18 @@ class AdminPanelProvider extends PanelProvider
             
 
             ->userMenuItems([
+                MenuItem::make()
+                    ->label(function () {
+                        $unreadCount = Auth::user()?->unreadNotifications()->count() ?? 0;
+                        $label = 'Notifications';
+                        if ($unreadCount > 0) {
+                            $label .= " ({$unreadCount})";
+                        }
+                        return $label;
+                    })
+                    ->url('/admin/notifications')
+                    ->icon('heroicon-o-bell')
+                    ->sort(-1),
                 MenuItem::make()
                     ->label('Edit Profile')
                     ->url(fn () => Filament::getPanel('admin')->getProfileUrl())
