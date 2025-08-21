@@ -21,5 +21,9 @@ class Knowledgebase extends Model
     {
         return $this->belongsTo(Field::class, 'field_id', 'field_id');
     }
-
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+    
 }

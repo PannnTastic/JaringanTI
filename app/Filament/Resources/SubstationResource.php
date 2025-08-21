@@ -52,10 +52,10 @@ class SubstationResource extends Resource
                     ->label('Prioritas')
                     ->numeric()
                     ->required(),
-                    Forms\Components\TextInput::make('substation_terdekat')
-                    ->label('substation Terdekat')
-                    ->default('-')
-                    ->maxLength(255),
+                    // Forms\Components\TextInput::make('substation_terdekat')
+                    // ->label('substation Terdekat')
+                    // ->default('-')
+                    // ->maxLength(255),
                     
                     
                     // Forms\Components\Select::make('substation_fo')

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('knowledgebase_category', function (Blueprint $table) {
             $table->id('kbc_id');
             $table->string('kbc_name');
+            $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
             $table->timestamps();
         });
     }

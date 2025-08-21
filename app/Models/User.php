@@ -67,6 +67,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Substation::class, 'user_id', 'user_id');
     }
+    public function knowledges()
+    {
+        return $this->hasMany(Knowledgebase::class, 'user_id', 'user_id');
+    }
 
     public function documents()
     {

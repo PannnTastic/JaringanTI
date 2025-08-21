@@ -33,6 +33,7 @@
                         <span class="ml-2 text-xs text-gray-500">({{ $cat->knowledgebase->count() }})</span>
                     </a>
                 </li>
+                    
                 @endforeach
             </ul>
         </aside>
@@ -51,7 +52,7 @@
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer p-6">
                     <div class="flex items-center justify-between mb-2">
                         <span class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                            {{ $kb->category->field_name  }}
+                            {{ $kb->user->name}}
                         </span>
                         <span class="text-xs text-gray-500">
                             {{ $kb->created_at ? $kb->created_at->format('d M Y') : '' }}

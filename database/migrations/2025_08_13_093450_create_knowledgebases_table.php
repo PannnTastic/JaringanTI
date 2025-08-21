@@ -19,6 +19,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             $table->foreignId('field_id')->constrained('field')->references('field_id')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->references('id')->onDelete('cascade');
         });
     }
 

@@ -34,7 +34,7 @@ class AktivasiResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-check-circle';
     
-    protected static ?string $navigationLabel = 'Activation';
+    protected static ?string $navigationLabel = 'Aktivasi';
     
     protected static ?string $modelLabel = 'Aktivasi';
     
@@ -76,22 +76,22 @@ class AktivasiResource extends Resource
                     ->helperText('Ini adalah data substation yang akan diaktivasi/diedit'),
                 
                 Select::make('pop_id')
-                    ->label('POP')
+                    ->label('POP / SUB POP')
                     ->options(Pop::pluck('pop_name', 'pop_id'))
                     ->searchable()
                     ,
                 Select::make('substation_terdekat')
-                    ->label('Terdekat')
-                    ->options(Substation::pluck('substation_terdekat', 'substation_terdekat'))
+                    ->label('Gardu Terdekat')
+                    ->options(Substation::pluck('substation_name', 'substation_name'))
                     ->searchable()
                     ->required(),
                 TextInput::make('substation_feeder')
                     ->label('Feeder')
                     ->maxLength(255),
                     
-                TextInput::make('substation_fo')
-                    ->label('FO')
-                    ->maxLength(255),
+                // TextInput::make('substation_fo')
+                //     ->label('FO')
+                //     ->maxLength(255),
                     
                     
                 TextInput::make('substation_cable_fa')
@@ -128,11 +128,10 @@ class AktivasiResource extends Resource
                     
                 Toggle::make('substation_status')
                     ->label('Status Aktif')
-                    ->default(true),
+                    ->default(false),
 
                 Forms\Components\DatePicker::make('substation_periode')
-                    ->label('Periode')
-                    
+                    ->label('Periode Pengajuan Awal')
                     ->default(now()->format('Y-m-d')) // default format tanggal lengkap
                     ->placeholder('Pilih tanggal')
                     ->displayFormat('d-m-Y'), // tampilkan hari-bulan-tahun 
@@ -183,7 +182,7 @@ class AktivasiResource extends Resource
                                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                                 'application/msword',
                             ])
-                            ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX. Maksimal 2MB'),
+                            ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX.'),
                     ]),
 
                     Forms\Components\RichEditor::make('substation_info')
@@ -333,6 +332,8 @@ class AktivasiResource extends Resource
             // Tidak ada create page - hanya bisa edit substation yang sudah ada
         ];
     }
+
+    
     
     public static function shouldRegisterNavigation(): bool
     {

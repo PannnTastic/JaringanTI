@@ -21,7 +21,7 @@
         <div class="bg-white rounded-lg shadow p-8">
             <div class="mb-4">
                 <span class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                    {{ $kb->category->field_name ?? 'Umum' }}
+                    {{ $kb->user->name ?? 'Umum' }}
                 </span>
                 <span class="ml-4 text-xs text-gray-500">
                     {{ $kb->created_at ? $kb->created_at->format('d M Y') : '' }}

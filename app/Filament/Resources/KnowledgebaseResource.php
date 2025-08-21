@@ -14,6 +14,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class KnowledgebaseResource extends Resource
 {
@@ -36,6 +37,13 @@ class KnowledgebaseResource extends Resource
                     ->label('Kategori Knowledgebase')
                     ->required()
                     ->relationship('category', 'field_name'),
+                Forms\Components\Select::make('user_id')
+                    ->label('Nama User')
+                    ->default(auth()->id())
+                    ->disabled()
+                    ->dehydrated()
+                    ->required()
+                    ->relationship('user','name'),
                 Forms\Components\RichEditor::make('kb_content')
                     ->label('Konten Knowledgebase')
                     ->required()
@@ -49,6 +57,9 @@ class KnowledgebaseResource extends Resource
     {
         return $table
             ->columns([
+                
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Nama Penulis'),
                 Tables\Columns\TextColumn::make('kb_name')
                     ->label('Nama Knowledgebase')
                     ->searchable(),
@@ -110,10 +121,19 @@ class KnowledgebaseResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
+    $query = parent::getEloquentQuery()
+        ->withoutGlobalScopes([
+            SoftDeletingScope::class,
+        ]);
+
+    $user = Auth::user();
+
+    // Jika bukan admin, filter hanya data milik user
+    if ($user && !$user->hasRole('Administrator')) {
+        $query->where('user_id', $user->getKey());
+    }
+
+    return $query;
     }
     public static function shouldRegisterNavigation(): bool
     {
@@ -124,4 +144,5 @@ class KnowledgebaseResource extends Resource
     {
         return \App\Helpers\PermissionHelper::canAccessResource('knowledgebases');
     }
+    
 }

@@ -64,11 +64,11 @@ class UserResource extends Resource
                     Select::make('user_gender')
                         ->label('Jenis Kelamin')
                         ->options([
-                            'L' => 'Laki-laki',
-                            'P' => 'Perempuan',
+                            'Laki-Laki' => 'Laki-laki',
+                            'Perempuan' => 'Perempuan',
                         ])
-                        ->default('L')
-                        ->required(),
+                        ->default('Laki-Laki')
+                        ,
                     Forms\Components\Textarea::make('user_address')
                         ->label('Alamat')
                         ->rows(3)
@@ -79,16 +79,16 @@ class UserResource extends Resource
                         ->placeholder('Pilih tanggal lahir')
                         ->displayFormat('d-m-Y')
                         ->maxDate(now())
-                        ->required(),
+                        ,
                     Select::make('user_marital')
                         ->label('Status Pernikahan')
                         ->options([
                             'Menikah' => 'Menikah',
                             'Belum Menikah' => 'Belum Menikah',
                         ]),
-                Forms\Components\Toggle::make('status')
+                Forms\Components\Toggle::make('user_status')
                     ->label('Status')
-                    ->required(),
+                    ,
                 Select::make('role_id')
                     ->label('ID Role')
                     ->relationship('role', 'role_name')
