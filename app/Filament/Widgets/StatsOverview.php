@@ -4,7 +4,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\User;
-use App\Models\Role;
+use App\Models\Field;
 use App\Models\Vendor;
 use App\Models\Budget;
 use App\Models\Gardu;
@@ -26,7 +26,7 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         // Get all roles and their counts
-        $roles = Role::all();
+        $field = Field::all();
         $stats = [];
 
         // Add total users stat
@@ -39,16 +39,16 @@ class StatsOverview extends BaseWidget
             ]);
 
         // Add stats for each role
-        foreach ($roles as $role) {
-            $userCount = User::where('role_id', $role->role_id)->count();
-            $stats[] = Stat::make($role->role_name, $userCount)
-                ->description('Pengguna')
-                ->icon('heroicon-o-user-group')
-                ->color($this->getRoleColor($role->role_name))
-                ->extraAttributes([
-                    'class' => 'md:col-span-1 xl:col-span-1',
-                ]);
-        }
+        // foreach ($field as $field) {
+        //     $userCount = User::where('field_id', $field->field_id)->count();
+        //     $stats[] = Stat::make($field->field_name, $userCount)
+        //         ->description('Pengguna')
+        //         ->icon('heroicon-o-user-group')
+        //         ->color($this->getRoleColor($field->field_name))
+        //         ->extraAttributes([
+        //             'class' => 'md:col-span-1 xl:col-span-1',
+        //         ]);
+        // }
 
         // Add other stats
         $stats[] = Stat::make('Total Vendors', Vendor::count())
@@ -56,16 +56,16 @@ class StatsOverview extends BaseWidget
             ->icon('heroicon-o-building-office')
             ->color('info')
             ->extraAttributes([
-                'class' => 'md:col-span-2',
-            ]);
-
-        $stats[] = Stat::make('Total Budget', Budget::count())
-            ->description('Budget')
-            ->icon('heroicon-o-currency-dollar')
-            ->color('warning')
-            ->extraAttributes([
                 'class' => 'md:col-span-1',
             ]);
+
+        // $stats[] = Stat::make('Total Budget', Budget::count())
+        //     ->description('Budget')
+        //     ->icon('heroicon-o-currency-dollar')
+        //     ->color('warning')
+        //     ->extraAttributes([
+        //         'class' => 'md:col-span-1',
+        //     ]);
 
         $stats[] = Stat::make('Total Substation', Substation::count())
             ->description('Substation')
@@ -95,5 +95,6 @@ class StatsOverview extends BaseWidget
             default => 'primary',
         };
     }
+    
     
 }

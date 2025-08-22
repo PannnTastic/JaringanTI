@@ -395,7 +395,7 @@ class PermitResource extends Resource
                         if (!$record) return 'N/A';
                         
                         $user = Auth::user();
-                        $userRole = DB::table('roles')->where('role_id', $user->role_id)->first();
+                        $userRole = $user->role ?? null;
                         
                         // Jika user adalah admin
                         if ($userRole && strtolower($userRole->role_name) === 'administrator') {
@@ -501,7 +501,7 @@ class PermitResource extends Resource
                         if (!$record) return null;
                         
                         $user = Auth::user();
-                        $userRole = DB::table('roles')->where('role_id', $user->role_id)->first();
+                        $userRole = $user->role ?? null;
                         
                         if (!$userRole || $record->getAttribute('user_id') == Auth::id()) {
                             return null;

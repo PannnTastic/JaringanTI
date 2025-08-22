@@ -5,7 +5,7 @@
             <x-filament::card>
                 <div class="text-center">
                     <div class="text-2xl font-bold text-primary-600">
-                        {{ \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')->where('notifiable_id', auth()->id())->count() }}
+                        {{ \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')->where('notifiable_id', \Illuminate\Support\Facades\Auth::id())->count() }}
                     </div>
                     <div class="text-sm text-gray-600">Total Notifications</div>
                 </div>
@@ -14,7 +14,7 @@
             <x-filament::card>
                 <div class="text-center">
                     <div class="text-2xl font-bold text-warning-600">
-                        {{ \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')->where('notifiable_id', auth()->id())->whereNull('read_at')->count() }}
+                        {{ \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')->where('notifiable_id', \Illuminate\Support\Facades\Auth::id())->whereNull('read_at')->count() }}
                     </div>
                     <div class="text-sm text-gray-600">Unread</div>
                 </div>
@@ -23,7 +23,7 @@
             <x-filament::card>
                 <div class="text-center">
                     <div class="text-2xl font-bold text-success-600">
-                        {{ \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')->where('notifiable_id', auth()->id())->whereNotNull('read_at')->count() }}
+                        {{ \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')->where('notifiable_id', \Illuminate\Support\Facades\Auth::id())->whereNotNull('read_at')->count() }}
                     </div>
                     <div class="text-sm text-gray-600">Read</div>
                 </div>

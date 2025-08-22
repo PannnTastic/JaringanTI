@@ -15,4 +15,8 @@ class Field extends Model
     {
         return $this->hasMany(Knowledgebase::class, 'field_id', 'field_id');
     }
+     public function user() {
+        return $this->belongsTo(User::class,'field_id','field_id');
+    
+    }
 }

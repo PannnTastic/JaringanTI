@@ -76,6 +76,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Document::class, 'user_id', 'user_id');
     }
+    public function field()
+    {
+        return $this->hasMany(Field::class, 'field_id', 'field_id');
+    }
 
     public function hasPermission(string $permission): bool
 {

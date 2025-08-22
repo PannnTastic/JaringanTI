@@ -29,6 +29,11 @@ class FilamentRolePermission
                 abort(403, 'Akses ditolak. Anda tidak memiliki permission untuk mengakses menu ini.');
             }
         }
+        // Allow access to pages (like notifications) for authenticated users
+        elseif (preg_match('/filament\.admin\.pages\./', $routeName)) {
+            // Pages are accessible to all authenticated users
+            // You can add specific page permissions here if needed
+        }
 
         return $next($request);
     }

@@ -10,7 +10,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Actions\Action as HeaderAction;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
 
 class Notifications extends Page implements HasTable
 {
@@ -25,9 +24,13 @@ class Notifications extends Page implements HasTable
     protected static ?string $navigationLabel = 'Notifications';
     
     protected static ?int $navigationSort = 99;
+    
+    protected static ?string $slug = 'notifications';
 
-    // Sembunyikan dari navigasi karena akan diakses via user menu
-    protected static bool $shouldRegisterNavigation = false;
+    public static function canAccess(): bool
+    {
+        return Auth::check();
+    }
 
     public function table(Table $table): Table
     {
@@ -136,7 +139,12 @@ class Notifications extends Page implements HasTable
                 ->action(function () {
                     /** @var \App\Models\User $user */
                     $user = Auth::user();
-                    $user->unreadNotifications->markAsRead();
+                    
+                    // Mark all unread notifications as read
+                    \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')
+                        ->where('notifiable_id', Auth::id())
+                        ->whereNull('read_at')
+                        ->update(['read_at' => now()]);
                     
                     \Filament\Notifications\Notification::make()
                         ->title('Success')
@@ -145,9 +153,10 @@ class Notifications extends Page implements HasTable
                         ->send();
                 })
                 ->visible(function () {
-                    /** @var \App\Models\User $user */
-                    $user = Auth::user();
-                    return $user->unreadNotifications()->count() > 0;
+                    return \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')
+                        ->where('notifiable_id', Auth::id())
+                        ->whereNull('read_at')
+                        ->count() > 0;
                 })
                 ->requiresConfirmation()
                 ->modalHeading('Mark all notifications as read')

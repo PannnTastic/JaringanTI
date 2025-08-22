@@ -37,6 +37,15 @@ class UserResource extends Resource
                     ->label('Nama')
                     ->required()
                     ->maxLength(255),
+                // Forms\Components\TextInput::make('field.field_name')
+                //     ->label('Bidang')
+                //     ->required()
+                //     ->maxLength(255),
+                    Select::make('field_id')
+                    ->label('Bidang')
+                    ->relationship('field', 'field_name')
+                    
+                    ->required(),
                 Forms\Components\TextInput::make('email')
                     ->label('Email')
                     ->email()
@@ -136,6 +145,10 @@ class UserResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('role.role_name')
                     ->label('Role')
+                    ->sortable(),
+                
+                Tables\Columns\TextColumn::make('field.field_name')
+                    ->label('Bidang')
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('created_at')

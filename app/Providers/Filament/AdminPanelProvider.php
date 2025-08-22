@@ -16,7 +16,9 @@ use App\Filament\Widgets\StatsOverview;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Widgets\LatestActivity;
 use App\Filament\Widgets\UserVendorChart;
+use App\Filament\Widgets\UserFieldChart;
 use Filament\Http\Middleware\Authenticate;
+use App\Services\PermitNotificationService;
 use App\Http\Middleware\FilamentRolePermission;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -27,8 +29,9 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Pages\Notifications;
 
-class AdminPanelProvider extends PanelProvider
+    class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
@@ -46,11 +49,13 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+                \App\Filament\Pages\Notifications::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 StatsOverview::class,
-                
+                \App\Filament\Widgets\UserFieldChart::class,
+                // KnowledgebaseChart::class,
                 UserVendorChart::class,
                 LatestActivity::class,
                 Widgets\AccountWidget::class,  
@@ -66,7 +71,10 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label(function () {
-                        $unreadCount = Auth::user()?->unreadNotifications()->count() ?? 0;
+                        $unreadCount = \Illuminate\Notifications\DatabaseNotification::where('notifiable_type', 'App\\Models\\User')
+                            ->where('notifiable_id', Auth::id())
+                            ->whereNull('read_at')
+                            ->count();
                         $label = 'Notifications';
                         if ($unreadCount > 0) {
                             $label .= " ({$unreadCount})";
