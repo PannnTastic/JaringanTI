@@ -92,7 +92,6 @@ class EditProfile extends AuthEditProfile
                 FileUpload::make('user_photo')
                     ->image()
                     ->directory('avatars')
-                    ->maxSize(2048)
                     ->label('Foto Profil'),
             ], parent::getFormSchema()));
     }
