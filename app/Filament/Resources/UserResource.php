@@ -64,11 +64,18 @@ class UserResource extends Resource
                     Select::make('user_gender')
                         ->label('Jenis Kelamin')
                         ->options([
-                            'Laki-Laki' => 'Laki-laki',
+                            'Laki-Laki' => 'Laki-Laki',
                             'Perempuan' => 'Perempuan',
                         ])
-                        ->default('Laki-Laki')
-                        ,
+                        ->default('Laki-Laki'),
+                    Select::make('user_type')
+                        ->label('Jenis Pengguna')
+                        ->options([
+                            'Pegawai' => 'Pegawai',
+                            'OJT' => 'OJT',
+                            'TAD' => 'TAD',
+                            'HPI' => 'HPI',
+                        ]),
                     Forms\Components\Textarea::make('user_address')
                         ->label('Alamat')
                         ->rows(3)
@@ -107,14 +114,26 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('user_type')
+                    ->label('Tipe Pengguna')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
-               
-                
+                Tables\Columns\TextColumn::make('user_birthday')
+                    ->label('Usia')
+                    ->formatStateUsing(function ($state) {
+                        if (!$state) {
+                            return '-';
+                        }
+                        $birthDate = \Carbon\Carbon::parse($state);
+                        $age = floor($birthDate->diffInYears(now()));
+                        
+                        return $age . ' tahun';
+                    }),
                 Tables\Columns\TextColumn::make('role.role_name')
                     ->label('Role')
                     ->sortable(),

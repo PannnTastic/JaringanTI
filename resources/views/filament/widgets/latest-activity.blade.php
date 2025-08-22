@@ -1,3 +1,6 @@
+@php
+use Illuminate\Support\Carbon;
+@endphp
 <x-filament-widgets::widget>
     <x-filament::section>
         <x-slot name="heading">
@@ -15,10 +18,13 @@
                         <div>
                             <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $activity->title }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $activity->description }}</p>
+                            {{-- <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ $activity->keterangan }}</p> --}}
                         </div>
                     </div>
+                    <div>                            <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ $activity->keterangan }}</p>
+</div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ $activity->created_at->diffForHumans() }}
+                        {{ Carbon::parse($activity->last_modified)->diffForHumans() }}
                     </span>
                 </div>
             @empty

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->boolean('status')->default(1);
             $table->foreignId('role_id')->constrained('roles')->references('role_id');
             $table->string('user_photo')->nullable();
+            $table->string('user_type')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

@@ -90,7 +90,7 @@ class User extends Authenticatable
    // app/Models/User.php
     public function getAvatarUrlAttribute(): string
     {
-        if ($this->photo) {
+        if ($this->user_photo) {
             return Storage::disk('public')->url($this->user_photo);
         }
 

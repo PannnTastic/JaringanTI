@@ -67,11 +67,21 @@ class EditProfile extends AuthEditProfile
                     Select::make('user_gender')
                         ->label('Jenis Kelamin')
                         ->options([
-                            'L' => 'Laki-laki',
-                            'P' => 'Perempuan',
+                             'Laki-Laki' => 'Laki-Laki',
+                            'Perempuan' => 'Perempuan',
                         ])
-                        ->default('L')
+                        ->default('Laki-Laki')
                         ->required(),
+                    Select::make('user_type')
+                        ->label('Jenis Kelamin')
+                        ->label('Jenis Pengguna')
+                        ->required()
+                        ->options([
+                            'Pegawai' => 'Pegawai',
+                            'OJT' => 'OJT',
+                            'TAD' => 'TAD',
+                            'HPI' => 'HPI',
+                        ]),
                     Forms\Components\Textarea::make('user_address')
                         ->label('Alamat')
                         ->rows(3)
@@ -92,8 +102,20 @@ class EditProfile extends AuthEditProfile
                 FileUpload::make('user_photo')
                     ->image()
                     ->directory('avatars')
-                    ->maxSize(2048)
                     ->label('Foto Profil'),
             ], parent::getFormSchema()));
     }
+    protected function afterSave(): void
+    {
+        // Redirect dengan notifikasi
+        // $this->redirect('/admin/dashboard');
+        
+        // Atau dengan session flash message
+        session()->flash('success', 'Profile berhasil diperbarui!');
+        $this->redirect('/admin');
+    }
+    //   protected function getRedirectUrl(): string
+    // {
+    //     return $this->getResource()::getUrl('index');
+    // }
 }  

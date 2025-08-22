@@ -218,9 +218,9 @@ class AktivasiResource extends Resource
                     ->label('Feeder')
                     ->searchable(),
 
-                TextColumn::make('substation_fo')
-                    ->label('FO')
-                    ->searchable(),
+                // TextColumn::make('substation_fo')
+                //     ->label('FO')
+                //     ->searchable(),
 
                 TextColumn:: make('substation_cable_fa')
                     ->label('Cable FA')
