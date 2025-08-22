@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Services\PermitNotificationService;
 use App\Filament\Resources\PermitResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\PermitResource\RelationManagers;
@@ -195,6 +196,61 @@ class PermitResource extends Resource
         return false;
     }
 
+    // Method untuk mendapatkan informasi rejection detail
+    public static function getRejectionDetails($record): ?array
+    {
+        if ($record->getAttribute('permit_status') != -1) {
+            return null;
+        }
+
+        $rejectedApprover = $record->approvers()
+            ->wherePivot('approver_status', -1)
+            ->withPivot(['rejection_reason', 'approved_at'])
+            ->first();
+
+        return [
+            'rejected_by' => $record->getAttribute('rejected_by'),
+            'rejected_at' => $record->getAttribute('rejected_at'),
+            'rejection_reason' => $rejectedApprover?->pivot?->rejection_reason,
+        ];
+    }
+
+    // Method untuk reset approval status (jika diperlukan untuk re-approval)
+    public static function resetApprovals($record): bool
+    {
+        try {
+            DB::beginTransaction();
+            
+            // Reset semua approval status kembali ke 0
+            $record->approvers()->updateExistingPivot(
+                $record->approvers->pluck('role_id')->toArray(),
+                [
+                    'approver_status' => 0,
+                    'approved_at' => null,
+                    'rejection_reason' => null
+                ]
+            );
+            
+            // Reset permit status
+            $record->update([
+                'permit_status' => 0,
+                'rejected_by' => null,
+                'rejected_at' => null
+            ]);
+            
+            DB::commit();
+            return true;
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Failed to reset approvals', [
+                'permit_id' => $record->permit_id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -231,15 +287,48 @@ class PermitResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('users.name')
-                    ->label('Nama Pemohon'),
+                    ->label('Nama Pemohon')
+                    ->getStateUsing(fn (?Permit $record) => $record?->users?->name ?? ''),
                 Tables\Columns\TextColumn::make('substations.substation_name')
-                    ->label('Nama Substation'),
+                    ->label('Nama Substation')
+                    ->getStateUsing(fn (?Permit $record) => $record?->substations?->substation_name ?? ''),
                 Tables\Columns\IconColumn::make('permit_status')
                     ->label('Status Permit')
-                    ->boolean(),
+                    ->getStateUsing(function (?Permit $record) {
+                        if (!$record) return 'pending';
+                        
+                        $status = $record->getAttribute('permit_status');
+                        return match($status) {
+                            1 => 'approved',
+                            -1 => 'rejected', 
+                            default => 'pending'
+                        };
+                    })
+                    ->icons([
+                        'heroicon-o-clock' => 'pending',
+                        'heroicon-o-check-circle' => 'approved',
+                        'heroicon-o-x-circle' => 'rejected',
+                    ])
+                    ->colors([
+                        'warning' => 'pending',
+                        'success' => 'approved', 
+                        'danger' => 'rejected',
+                    ])
+                    ->tooltip(function (?Permit $record) {
+                        if (!$record) return null;
+                        
+                        $status = $record->getAttribute('permit_status');
+                        return match($status) {
+                            1 => 'Permit Disetujui',
+                            -1 => 'Permit Ditolak' . ($record->getAttribute('rejected_by') ? ' oleh ' . $record->getAttribute('rejected_by') : ''),
+                            default => 'Menunggu Persetujuan'
+                        };
+                    }),
                 Tables\Columns\TextColumn::make('approvers_status')
                     ->label('Status Approval')
-                    ->getStateUsing(function (Permit $record) {
+                    ->getStateUsing(function (?Permit $record) {
+                        if (!$record) return 'N/A';
+                        
                         $approvers = $record->approvers()
                             ->withPivot(['approver_status', 'approved_at'])
                             ->get();
@@ -250,7 +339,9 @@ class PermitResource extends Resource
                         return "{$approved}/{$total} Approved";
                     })
                     ->badge()
-                    ->color(function (Permit $record) {
+                    ->color(function (?Permit $record) {
+                        if (!$record) return 'gray';
+                        
                         $approvers = $record->approvers()
                             ->withPivot(['approver_status'])
                             ->get();
@@ -268,18 +359,31 @@ class PermitResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('next_approver')
                     ->label('Menunggu Approval')
-                    ->getStateUsing(function (Permit $record) {
-                        if ($record->getAttribute('permit_status')) {
-                            return 'Selesai';
+                    ->getStateUsing(function (?Permit $record) {
+                        if (!$record) return 'N/A';
+                        
+                        $status = $record->getAttribute('permit_status');
+                        
+                        if ($status == 1) {
+                            return 'Disetujui';
+                        } elseif ($status == -1) {
+                            $rejectedBy = $record->getAttribute('rejected_by');
+                            return 'Ditolak' . ($rejectedBy ? ' oleh ' . $rejectedBy : '');
                         }
                         
                         $nextRole = self::getNextApprovalRole($record);
                         return $nextRole ? ucwords(str_replace('_', ' ', $nextRole)) : 'Semua Selesai';
                     })
                     ->badge()
-                    ->color(function (Permit $record) {
-                        if ($record->getAttribute('permit_status')) {
+                    ->color(function (?Permit $record) {
+                        if (!$record) return 'gray';
+                        
+                        $status = $record->getAttribute('permit_status');
+                        
+                        if ($status == 1) {
                             return 'success';
+                        } elseif ($status == -1) {
+                            return 'danger';
                         }
                         
                         $nextRole = self::getNextApprovalRole($record);
@@ -287,7 +391,9 @@ class PermitResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('my_approval_status')
                     ->label('Status Approval Saya')
-                    ->getStateUsing(function (Permit $record) {
+                    ->getStateUsing(function (?Permit $record) {
+                        if (!$record) return 'N/A';
+                        
                         $user = Auth::user();
                         $userRole = DB::table('roles')->where('role_id', $user->role_id)->first();
                         
@@ -298,7 +404,12 @@ class PermitResource extends Resource
                         
                         // Jika user adalah pembuat permit
                         if ($record->getAttribute('user_id') == Auth::id()) {
-                            return 'Pembuat Permit';
+                            $status = $record->getAttribute('permit_status');
+                            return match($status) {
+                                1 => 'Permit Disetujui',
+                                -1 => 'Permit Ditolak',
+                                default => 'Menunggu Approval'
+                            };
                         }
                         
                         if (!$userRole) {
@@ -307,7 +418,7 @@ class PermitResource extends Resource
                         
                         $approval = $record->approvers()
                             ->where('approvers.role_id', $userRole->role_id)
-                            ->withPivot(['approver_status', 'approved_at'])
+                            ->withPivot(['approver_status', 'approved_at', 'rejection_reason'])
                             ->first();
                         
                         if (!$approval) {
@@ -318,14 +429,26 @@ class PermitResource extends Resource
                             $approvedAt = $approval->pivot->approved_at;
                             $formattedDate = $approvedAt ? \Carbon\Carbon::parse($approvedAt)->format('d/m/Y H:i') : '';
                             return 'Disetujui' . ($formattedDate ? ' (' . $formattedDate . ')' : '');
+                        } elseif ($approval->pivot->approver_status == -1) {
+                            $rejectedAt = $approval->pivot->approved_at;
+                            $formattedDate = $rejectedAt ? \Carbon\Carbon::parse($rejectedAt)->format('d/m/Y H:i') : '';
+                            return 'Ditolak' . ($formattedDate ? ' (' . $formattedDate . ')' : '');
                         } else {
+                            // Status 0 - belum diproses
+                            $permitStatus = $record->getAttribute('permit_status');
+                            if ($permitStatus == -1) {
+                                return 'Permit Ditolak';
+                            }
+                            
                             // Cek apakah giliran user untuk approve
                             $canApprove = self::canUserApprove($record, $userRole);
                             return $canApprove ? 'Giliran Saya' : 'Menunggu Urutan';
                         }
                     })
                     ->badge()
-                    ->color(function (Permit $record) {
+                    ->color(function (?Permit $record) {
+                        if (!$record) return 'gray';
+                        
                         $user = Auth::user();
                         $roleId = $user->role_id ?? null;
                         $userRole = $roleId ? DB::table('roles')->where('role_id', $roleId)->first() : null;
@@ -337,7 +460,12 @@ class PermitResource extends Resource
                         
                         // Jika user adalah pembuat permit
                         if ($record->getAttribute('user_id') == Auth::id()) {
-                            return 'info';
+                            $status = $record->getAttribute('permit_status');
+                            return match($status) {
+                                1 => 'success',
+                                -1 => 'danger',
+                                default => 'warning'
+                            };
                         }
                         
                         if (!$userRole) {
@@ -355,15 +483,78 @@ class PermitResource extends Resource
                         
                         if ($approval->pivot->approver_status == 1) {
                             return 'success';
+                        } elseif ($approval->pivot->approver_status == -1) {
+                            return 'danger';
                         } else {
+                            // Status 0 - belum diproses
+                            $permitStatus = $record->getAttribute('permit_status');
+                            if ($permitStatus == -1) {
+                                return 'gray';
+                            }
+                            
                             // Cek apakah giliran user untuk approve
                             $canApprove = self::canUserApprove($record, $userRole);
                             return $canApprove ? 'warning' : 'gray';
                         }
+                    })
+                    ->tooltip(function (?Permit $record) {
+                        if (!$record) return null;
+                        
+                        $user = Auth::user();
+                        $userRole = DB::table('roles')->where('role_id', $user->role_id)->first();
+                        
+                        if (!$userRole || $record->getAttribute('user_id') == Auth::id()) {
+                            return null;
+                        }
+                        
+                        $approval = $record->approvers()
+                            ->where('approvers.role_id', $userRole->role_id)
+                            ->withPivot(['rejection_reason'])
+                            ->first();
+                        
+                        if ($approval && $approval->pivot->approver_status == -1 && $approval->pivot->rejection_reason) {
+                            return 'Alasan: ' . $approval->pivot->rejection_reason;
+                        }
+                        
+                        return null;
                     }),
                 Tables\Columns\TextColumn::make('approvers')
                     ->label('Required Approvers')
-                    ->getStateUsing(fn (Permit $record) => $record->approvers->pluck('role_name')->implode(', ')),
+                    ->getStateUsing(fn (?Permit $record) => $record?->approvers?->pluck('role_name')->implode(', ') ?? ''),
+                Tables\Columns\TextColumn::make('rejection_details')
+                    ->label('Detail Penolakan')
+                    ->getStateUsing(function (?Permit $record) {
+                        if (!$record || $record->getAttribute('permit_status') != -1) {
+                            return null;
+                        }
+                        
+                        $rejectedBy = $record->getAttribute('rejected_by');
+                        $rejectedAt = $record->getAttribute('rejected_at');
+                        
+                        $details = '';
+                        if ($rejectedBy) {
+                            $details .= 'Ditolak oleh: ' . $rejectedBy;
+                        }
+                        if ($rejectedAt) {
+                            $formattedDate = \Carbon\Carbon::parse($rejectedAt)->format('d/m/Y H:i');
+                            $details .= ($details ? ' (' . $formattedDate . ')' : $formattedDate);
+                        }
+                        
+                        // Cari alasan penolakan dari approvers pivot
+                        $rejectionReason = $record->approvers()
+                            ->wherePivot('approver_status', -1)
+                            ->withPivot(['rejection_reason'])
+                            ->first()?->pivot?->rejection_reason;
+                        
+                        if ($rejectionReason) {
+                            $details .= "\nAlasan: " . $rejectionReason;
+                        }
+                        
+                        return $details ?: null;
+                    })
+                    ->wrap()
+                    ->visible(fn (?Permit $record) => $record?->getAttribute('permit_status') == -1)
+                    ->color('danger'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -378,11 +569,25 @@ class PermitResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('permit_status')
+                    ->label('Status Permit')
+                    ->options([
+                        '0' => 'Menunggu Approval',
+                        '1' => 'Disetujui',
+                        '-1' => 'Ditolak'
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (isset($data['value']) && $data['value'] !== '') {
+                            return $query->where('permit_status', $data['value']);
+                        }
+                        return $query;
+                    }),
                 Tables\Filters\SelectFilter::make('approval_status')
                     ->label('Status Approval Saya')
                     ->options([
                         'pending' => 'Menunggu Persetujuan',
                         'approved' => 'Sudah Disetujui',
+                        'rejected' => 'Sudah Ditolak',
                         'all' => 'Semua'
                     ])
                     ->default('all')
@@ -397,10 +602,14 @@ class PermitResource extends Resource
                             'pending' => $query->whereHas('approvers', function ($q) use ($userRole) {
                                 $q->where('approvers.role_id', $userRole->role_id)
                                   ->where('approvers.approver_status', 0);
-                            }),
+                            })->where('permit_status', 0), // Hanya yang belum ditolak
                             'approved' => $query->whereHas('approvers', function ($q) use ($userRole) {
                                 $q->where('approvers.role_id', $userRole->role_id)
                                   ->where('approvers.approver_status', 1);
+                            }),
+                            'rejected' => $query->whereHas('approvers', function ($q) use ($userRole) {
+                                $q->where('approvers.role_id', $userRole->role_id)
+                                  ->where('approvers.approver_status', -1);
                             }),
                             default => $query
                         };
@@ -497,33 +706,97 @@ class PermitResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('approver_status')
                     ->label('Approve')
-                    ->action(function (Permit $record) {
+                    ->action(function (?Permit $record) {
+                        if (!$record) return;
+                        
                         $userRole = Auth::user()->role;
                         
                         if ($userRole && self::canUserApprove($record, $userRole)) {
-                            // Update pivot record untuk role yang user miliki
-                            $record->approvers()
-                                ->updateExistingPivot($userRole->role_id, [
-                                    'approver_status' => 1,
-                                    'approved_at' => now()
+                            DB::beginTransaction();
+                            
+                            try {
+                                // Update pivot record untuk role yang user miliki
+                                $record->approvers()
+                                    ->updateExistingPivot($userRole->role_id, [
+                                        'approver_status' => 1,
+                                        'approved_at' => now()
+                                    ]);
+                                
+                                // Cek apakah semua approver sudah menyetujui
+                                $totalApprovers = $record->approvers()->count();
+                                $approvedCount = $record->approvers()
+                                    ->where('approvers.approver_status', 1)
+                                    ->count();
+                                
+                                // Jika semua sudah approve, update permit status
+                                if ($approvedCount == $totalApprovers) {
+                                    $record->update(['permit_status' => 1]);
+                                    
+                                    // Kirim notifikasi ke pembuat permit
+                                    PermitNotificationService::notifyPermitCreator($record, 'approved');
+                                    
+                                    Log::info('Permit fully approved', [
+                                        'permit_id' => $record->permit_id,
+                                        'final_approver' => $userRole->role_name,
+                                        'approved_by_user' => Auth::user()->name,
+                                        'approved_at' => now()
+                                    ]);
+                                    
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Permit Disetujui Sepenuhnya')
+                                        ->body('Permit telah disetujui oleh semua approver dan siap diproses.')
+                                        ->success()
+                                        ->send();
+                                } else {
+                                    // Kirim notifikasi ke approver berikutnya
+                                    PermitNotificationService::notifyNextApprover($record);
+                                    
+                                    Log::info('Permit partially approved', [
+                                        'permit_id' => $record->permit_id,
+                                        'approver' => $userRole->role_name,
+                                        'approved_by_user' => Auth::user()->name,
+                                        'progress' => "$approvedCount/$totalApprovers",
+                                        'approved_at' => now()
+                                    ]);
+                                    
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Approval Berhasil')
+                                        ->body("Permit telah Anda setujui. Progress: $approvedCount/$totalApprovers approver.")
+                                        ->success()
+                                        ->send();
+                                }
+                                
+                                DB::commit();
+                                
+                            } catch (\Exception $e) {
+                                DB::rollback();
+                                
+                                Log::error('Failed to approve permit', [
+                                    'permit_id' => $record->permit_id,
+                                    'user' => Auth::user()->name,
+                                    'error' => $e->getMessage()
                                 ]);
-                            
-                            // Cek apakah semua approver sudah menyetujui
-                            $totalApprovers = $record->approvers()->count();
-                            $approvedCount = $record->approvers()
-                                ->where('approvers.approver_status', 1)
-                                ->count();
-                            
-                            // Jika semua sudah approve, update permit status
-                            if ($approvedCount == $totalApprovers) {
-                                $record->update(['permit_status' => true]);
+                                
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Gagal Menyetujui Permit')
+                                    ->body('Terjadi kesalahan saat menyetujui permit. Silakan coba lagi.')
+                                    ->danger()
+                                    ->send();
                             }
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Tidak Dapat Menyetujui')
+                                ->body('Anda tidak memiliki izin untuk menyetujui permit ini atau bukan giliran Anda.')
+                                ->warning()
+                                ->send();
                         }
                     })
                     ->requiresConfirmation()
                     ->modalDescription('Apakah Anda yakin ingin menyetujui permit ini? Approval akan dilakukan sesuai urutan yang telah ditentukan.')
                     ->color('success')
-                    ->visible(function (Permit $record) {
+                    ->visible(function (?Permit $record) {
+                        if (!$record) return false;
+                        
                         $userRole = Auth::user()->role;
                         
                         if (!$userRole) {
@@ -538,6 +811,158 @@ class PermitResource extends Resource
                         
                         // Dan cek apakah sesuai urutan approval
                         return $hasApprovalRole && self::canUserApprove($record, $userRole);
+                    }),
+
+                Tables\Actions\Action::make('reject')
+                    ->label('Tolak')
+                    ->action(function (?Permit $record, array $data) {
+                        if (!$record) return;
+                        
+                        $userRole = Auth::user()->role;
+                        
+                        if ($userRole && self::canUserApprove($record, $userRole)) {
+                            DB::beginTransaction();
+                            
+                            try {
+                                // Update pivot record untuk role yang user miliki dengan status rejection (-1)
+                                $record->approvers()
+                                    ->updateExistingPivot($userRole->role_id, [
+                                        'approver_status' => -1, // -1 untuk rejected
+                                        'approved_at' => now(),
+                                        'rejection_reason' => $data['rejection_reason'] ?? null
+                                    ]);
+                                
+                                // Update permit status menjadi rejected
+                                $record->update([
+                                    'permit_status' => -1, // -1 untuk rejected
+                                    'rejected_by' => $userRole->role_name,
+                                    'rejected_at' => now()
+                                ]);
+                                
+                                DB::commit();
+                                
+                                // Kirim notifikasi ke pembuat permit dengan alasan penolakan
+                                PermitNotificationService::notifyPermitCreator($record, 'rejected', $data['rejection_reason'] ?? null);
+                                
+                                // Log activity
+                                Log::info('Permit rejected', [
+                                    'permit_id' => $record->permit_id,
+                                    'rejected_by' => $userRole->role_name,
+                                    'rejected_by_user' => Auth::user()->name,
+                                    'rejection_reason' => $data['rejection_reason'] ?? 'No reason provided',
+                                    'rejected_at' => now()
+                                ]);
+                                
+                                // Notifikasi success
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Permit Berhasil Ditolak')
+                                    ->body('Permit telah ditolak dan tidak dapat diproses lebih lanjut.')
+                                    ->success()
+                                    ->send();
+                                    
+                            } catch (\Exception $e) {
+                                DB::rollback();
+                                
+                                // Log error
+                                Log::error('Failed to reject permit', [
+                                    'permit_id' => $record->permit_id,
+                                    'user' => Auth::user()->name,
+                                    'error' => $e->getMessage()
+                                ]);
+                                
+                                // Notifikasi error
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Gagal Menolak Permit')
+                                    ->body('Terjadi kesalahan saat menolak permit. Silakan coba lagi.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Tidak Dapat Menolak')
+                                ->body('Anda tidak memiliki izin untuk menolak permit ini atau bukan giliran Anda.')
+                                ->warning()
+                                ->send();
+                        }
+                    })
+                    ->form([
+                        Forms\Components\Textarea::make('rejection_reason')
+                            ->label('Alasan Penolakan')
+                            ->placeholder('Jelaskan alasan mengapa permit ini ditolak...')
+                            ->required()
+                            ->maxLength(500)
+                            ->rows(4)
+                    ])
+                    ->requiresConfirmation()
+                    ->modalHeading('Tolak Permit')
+                    ->modalDescription('Apakah Anda yakin ingin menolak permit ini? Permit yang ditolak tidak dapat diproses lebih lanjut.')
+                    ->modalSubmitActionLabel('Ya, Tolak')
+                    ->color('danger')
+                    ->icon('heroicon-o-x-circle')
+                    ->visible(function (?Permit $record) {
+                        if (!$record) return false;
+                        
+                        $userRole = Auth::user()->role;
+                        
+                        if (!$userRole) {
+                            return false;
+                        }
+                        
+                        // Hanya tampil jika permit belum disetujui dan belum ditolak
+                        if ($record->getAttribute('permit_status') != 0) {
+                            return false;
+                        }
+                        
+                        // Cek apakah user memiliki role yang ada di approvers list
+                        $hasApprovalRole = $record->approvers()
+                            ->where('approvers.role_id', $userRole->role_id)
+                            ->where('approvers.approver_status', 0)
+                            ->exists();
+                        
+                        // Dan cek apakah sesuai urutan approval
+                        return $hasApprovalRole && self::canUserApprove($record, $userRole);
+                    }),
+
+                Tables\Actions\Action::make('reset_approvals')
+                    ->label('Reset Approval')
+                    ->action(function (?Permit $record) {
+                        if (!$record) return;
+                        
+                        if (self::resetApprovals($record)) {
+                            // Kirim notifikasi ke semua approver
+                            PermitNotificationService::notifyApproversOnReset($record);
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->title('Reset Berhasil')
+                                ->body('Semua approval telah direset. Permit dapat diproses ulang dari awal.')
+                                ->success()
+                                ->send();
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Reset Gagal')
+                                ->body('Terjadi kesalahan saat reset approval. Silakan coba lagi.')
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Reset Approval Permit')
+                    ->modalDescription('Apakah Anda yakin ingin mereset semua approval? Proses approval akan dimulai dari awal.')
+                    ->modalSubmitActionLabel('Ya, Reset')
+                    ->color('warning')
+                    ->icon('heroicon-o-arrow-path')
+                    ->visible(function (?Permit $record) {
+                        if (!$record) return false;
+                        
+                        $userRole = Auth::user()->role;
+                        
+                        // Hanya admin yang bisa reset
+                        if (!$userRole || strtolower($userRole->role_name) !== 'administrator') {
+                            return false;
+                        }
+                        
+                        // Hanya tampil jika permit sudah pernah diproses (approved/rejected)
+                        return $record->getAttribute('permit_status') != 0;
                     })
 
             ])

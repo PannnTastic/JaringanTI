@@ -15,6 +15,10 @@ class Permit extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'rejected_at' => 'datetime',
+    ];
+
     // Accessor untuk kompatibilitas dengan IDE
     public function getUserIdAttribute($value)
     {
@@ -39,7 +43,7 @@ class Permit extends Model
     {
         return $this->belongsToMany(Role::class, 'approvers','permit_id','role_id')
             ->select(['roles.*']) // Explicit select untuk menghindari ambiguitas
-            ->withPivot(['approver_status', 'approved_at'])
+            ->withPivot(['approver_status', 'approved_at', 'rejection_reason'])
             ->withTimestamps();
     }
 

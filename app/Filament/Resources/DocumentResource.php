@@ -58,7 +58,7 @@ class DocumentResource extends Resource
                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                         'application/msword',
                     ])
-                    ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX. Maksimal 2MB'),
+                    ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX'),
                
             ]);
     }

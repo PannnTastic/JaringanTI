@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users', 'user_id');
             $table->foreignId('substation_id')->constrained('substations', 'substation_id');
             $table->boolean('permit_status')->default(0);
+            $table->string('rejected_by')->nullable();
+            $table->dateTime('rejected_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
