@@ -99,6 +99,11 @@ class EditProfile extends AuthEditProfile
                             'Menikah' => 'Menikah',
                             'Belum Menikah' => 'Belum Menikah',
                         ]),
+                    Select::make('field_id')
+                    ->label('Bidang')
+                    ->relationship('field', 'field_name')
+                    
+                    ->required(),
                 FileUpload::make('user_photo')
                     ->image()
                     ->directory('avatars')
