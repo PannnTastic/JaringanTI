@@ -37,6 +37,34 @@ Route::get('/categories/{field:field_id}', function ($fieldId) {
 
 Route::get('/kb/{kb:kb_id}', function ($kbId) {
     $kb = \App\Models\Knowledgebase::with('category')->findOrFail($kbId);
+    
+    // Process content to validate image paths and provide fallbacks
+    $kb->processed_content = preg_replace_callback(
+        '/<img[^>]*src=["\']([^"\']*)["\'][^>]*>/i',
+        function ($matches) {
+            $fullMatch = $matches[0];
+            $imagePath = $matches[1];
+            
+            // Convert storage URL to file path for checking
+            if (str_starts_with($imagePath, '/storage/')) {
+                $filePath = public_path(str_replace('/storage/', 'storage/', $imagePath));
+            } else {
+                $filePath = public_path($imagePath);
+            }
+            
+            // If file doesn't exist, add data attribute for JS handling
+            if (!file_exists($filePath)) {
+                // Add data attributes to help with error handling
+                if (strpos($fullMatch, 'data-missing="true"') === false) {
+                    $fullMatch = str_replace('<img', '<img data-missing="true" data-original-src="' . htmlspecialchars($imagePath) . '"', $fullMatch);
+                }
+            }
+            
+            return $fullMatch;
+        },
+        $kb->kb_content ?? ''
+    );
+    
     return view('single-kb', compact('kb'));
 })->name('single-kb');
 

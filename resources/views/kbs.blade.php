@@ -11,6 +11,46 @@
     <style>
         :root { color-scheme: light only !important; }
         html, body { background: #f9fafb !important; color: #111827 !important; }
+        
+        /* Line clamp utilities untuk membatasi text overflow */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Ensure cards have consistent height */
+        .card-grid {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+        }
+        
+        /* Break long words yang bisa overflow */
+        .break-words {
+            word-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        
+        /* Handle long URLs and links */
+        .break-all {
+            word-break: break-all;
+        }
+        
+        /* Ensure no horizontal overflow */
+        .overflow-wrap {
+            overflow-wrap: break-word;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -38,7 +78,7 @@
             </ul>
         </aside>
         <!-- Main Content -->
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 overflow-hidden max-w-full">
             <h1 class="text-2xl font-bold mb-6">Knowledge Base
                 @if(isset($categories) && request()->route('field'))
                     @php $current = $categories->firstWhere('field_id', request()->route('field')); @endphp
@@ -47,20 +87,20 @@
                     @endif
                 @endif
             </h1>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
                 @forelse($allKnowledge as $kb)
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer p-6">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer p-6 flex flex-col h-full overflow-hidden">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                        <span class="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full truncate max-w-32">
                             {{ $kb->user->name}}
                         </span>
-                        <span class="text-xs text-gray-500">
+                        <span class="text-xs text-gray-500 flex-shrink-0 ml-2">
                             {{ $kb->created_at ? $kb->created_at->format('d M Y') : '' }}
                         </span>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $kb->kb_name }}</h3>
-                    <p class="text-gray-600 text-sm mb-4">{{ Str::limit(strip_tags($kb->kb_content), 120) }}</p>
-                    <a href="{{ route('single-kb', $kb->kb_id) }}" class="text-blue-600 text-sm font-medium">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 overflow-hidden break-words">{{ $kb->kb_name }}</h3>
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-3 overflow-hidden flex-grow break-all overflow-wrap">{{ Str::limit(strip_tags($kb->kb_content), 120) }}</p>
+                    <a href="{{ route('single-kb', $kb->kb_id) }}" class="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors mt-auto">
                         Baca selengkapnya <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
