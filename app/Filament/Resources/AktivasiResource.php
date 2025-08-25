@@ -84,7 +84,8 @@ class AktivasiResource extends Resource
                     ->label('Gardu Terdekat')
                     ->options(Substation::pluck('substation_name', 'substation_name'))
                     ->searchable()
-                    ->required(),
+                    ->default('-')
+                    ,
                 TextInput::make('substation_feeder')
                     ->label('Feeder')
                     ->maxLength(255),
@@ -201,7 +202,7 @@ class AktivasiResource extends Resource
                 TextColumn::make('activation_status')
                     ->label('Status Aktivasi')
                     ->getStateUsing(function ($record) {
-                        return $record->user_id ? 'Sudah Diaktivasi' : 'Belum Diaktivasi';
+                        return $record->substation_status ? 'Sudah Diaktivasi' : 'Belum Diaktivasi';
                     })
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

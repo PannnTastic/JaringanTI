@@ -40,7 +40,6 @@ class SubstationResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('substation_feeder')
                     ->label('Feeder')
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('substation_motorized')
                     ->label('Motorized')
@@ -50,8 +49,7 @@ class SubstationResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('substation_priority')
                     ->label('Prioritas')
-                    ->numeric()
-                    ->required(),
+                    ->numeric(),
                     // Forms\Components\TextInput::make('substation_terdekat')
                     // ->label('substation Terdekat')
                     // ->default('-')
