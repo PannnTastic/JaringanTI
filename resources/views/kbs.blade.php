@@ -79,14 +79,17 @@
         </aside>
         <!-- Main Content -->
         <main class="flex-1 p-6 overflow-hidden max-w-full">
-            <h1 class="text-2xl font-bold mb-6">Knowledge Base
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-bold">Knowledge Base
                 @if(isset($categories) && request()->route('field'))
                     @php $current = $categories->firstWhere('field_id', request()->route('field')); @endphp
                     @if($current)
                         <span class="text-blue-600">- {{ $current->field_name }}</span>
                     @endif
                 @endif
-            </h1>
+                </h1>
+                
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
                 @forelse($allKnowledge as $kb)
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer p-6 flex flex-col h-full overflow-hidden">

@@ -165,6 +165,9 @@ class UserResource extends Resource
                 Tables\Columns\ImageColumn::make('user_photo')
                     ->label('Avatar')
                     ->disk('public')
+                    ->height(50)
+                    ->width(50)
+                    ->circular()
                     
                     
             ])

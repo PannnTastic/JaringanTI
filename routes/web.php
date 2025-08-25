@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -16,8 +17,13 @@ Route::get('/', function () {
         ->orderBy('created_at', 'desc')
         ->get();
     $apps = \App\Models\App::all(); // Ambil semua aplikasi
+    // Ambil hingga 7 foto random dari contents untuk slideshow
+    $slides = \App\Models\Content::whereNotNull('content_photo')
+        ->inRandomOrder()
+        ->limit(7)
+        ->get();
     
-    return view('kb', compact('categories', 'allKnowledge', 'apps'));
+    return view('kb', compact('categories', 'allKnowledge', 'apps', 'slides'));
 });
 
 Route::get('/categories/{field:field_id}', function ($fieldId) {
@@ -68,7 +74,18 @@ Route::get('/kb/{kb:kb_id}', function ($kbId) {
     return view('single-kb', compact('kb'));
 })->name('single-kb');
 
+Route::get('/content/{content:content_id}', function ($contentId) {
+    $content = \App\Models\Content::with('user')->findOrFail($contentId);
+    return view('single-content', compact('content'));
+})->name('single-content');
 
+// Route untuk menampilkan semua konten
+Route::get('/contents', function () {
+    $contents = \App\Models\Content::with('user')
+        ->orderBy('created_at', 'desc')
+        ->get();
+    return view('contents', compact('contents'));
+})->name('contents');
 
 
 

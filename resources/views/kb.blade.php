@@ -103,11 +103,114 @@
         </div>
     </header>
 
+    <!-- Slideshow Atas Hero Section -->
+    @if(isset($slides) && $slides->count() > 0)
+    <div id="content-slideshow" class="mt-6 relative max-w-4xl mx-auto w-full px-4">
+        <div class="overflow-hidden rounded-lg border border-blue-200 relative h-40 md:h-56 lg:h-64 flex items-center justify-center bg-white">
+            <div class="slides flex transition-transform duration-700 h-full items-center" style="width: {{ $slides->count() * 100 }}%">
+                @foreach($slides as $slide)
+                    <div class="slide w-full flex-shrink-0 flex items-center justify-center h-full" style="flex: 0 0 100%;">
+                        <img src="{{ asset('storage/' . $slide->content_photo) }}" alt="{{ $slide->content_title }}" class="w-full h-full object-cover">
+                    </div>
+                @endforeach
+            </div>
+            <button id="prevSlide" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 rounded-full p-2 shadow z-10 border border-blue-200 hover:bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="nextSlide" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 rounded-full p-2 shadow z-10 border border-blue-200 hover:bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <!-- Dots -->
+        <div class="flex justify-center gap-2 mt-2" id="slide-dots">
+            @for($i = 0; $i < $slides->count(); $i++)
+                <button class="dot w-2.5 h-2.5 rounded-full bg-blue-300 transition-all" data-index="{{ $i }}"></button>
+            @endfor
+        </div>
+    </div>
+    <script>
+        (function(){
+            // Scope everything to the slideshow container to avoid duplicate-ID collisions
+            const container = document.getElementById('content-slideshow');
+            if (!container) return;
+
+            const slidesEl = container.querySelector('.slides');
+            const dotsContainer = container.querySelector('#slide-dots');
+            const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.dot')) : [];
+            const prevBtn = container.querySelector('#prevSlide');
+            const nextBtn = container.querySelector('#nextSlide');
+
+            const total = {{ $slides->count() }};
+            if (!slidesEl || total === 0) return;
+
+            // If only one slide, hide controls and dots
+            if (total === 1) {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+                if (dotsContainer) dotsContainer.style.display = 'none';
+                return;
+            }
+
+            let index = 0;
+            let timer = null;
+
+            function move() {
+                // Use exact percentage arithmetic to match slide widths
+                const percent = index * (100 / total);
+                slidesEl.style.transform = `translateX(-${percent}%)`;
+
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('bg-blue-600', i === index);
+                    dot.classList.toggle('bg-blue-300', i !== index);
+                });
+            }
+
+            function goTo(i) {
+                if (typeof i !== 'number') return;
+                index = ((i % total) + total) % total; // normalize
+                move();
+                resetAutoplay();
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    goTo(index - 1);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    goTo(index + 1);
+                });
+            }
+
+            dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+            function resetAutoplay() {
+                if (timer) clearInterval(timer);
+                timer = setInterval(() => { goTo(index + 1); }, 4000);
+            }
+
+            // initialize
+            move();
+            resetAutoplay();
+        })();
+    </script>
+    @else
+    <div class="mt-6 text-center text-blue-200 text-sm">Belum ada foto konten untuk ditampilkan.</div>
+    @endif
+
     <!-- Hero Section -->
     <section class="bg-blue-600 text-white  flex p-6 lg:p-8 items-center lg:justify-center flex-col">
         <div class="max-w-4xl mx-auto px-4 text-center rounded-lg">
             <h2 class="text-3xl md:text-4xl font-bold mb-4">Seputar Jaringan TI</h2>
             <p class="text-blue-100 mb-2 text-lg">PT PLN Batam Gardu Induk Sei Baloi dan PLTD Baloi</p>
+            <a href="{{ route('contents') }}" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+                Semua Konten
+                <i class="fas fa-th-list ml-2"></i>
+            </a>
         </div>
     </section>
 

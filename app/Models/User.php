@@ -144,5 +144,8 @@ class User extends Authenticatable
         return $this->role()->first();
     }
 
-    
+    public function contents(){
+        return $this->hasMany(Content::class, 'user_id', 'user_id');
+    }
+
 }

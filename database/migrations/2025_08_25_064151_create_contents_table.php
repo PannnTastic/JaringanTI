@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('contents', function (Blueprint $table) {
-            $table->id();
+            $table->id('content_id');
+            $table->string('content_title');
+            $table->text('content_description');
+            $table->text('content_photo');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
             $table->timestamps();
         });
     }
