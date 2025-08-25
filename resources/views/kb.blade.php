@@ -250,24 +250,28 @@
 
 <!-- Hero Section -->
 <section class="flex p-6 lg:p-8 items-center lg:justify-center flex-col bg-white">
-    <div class="max-w-4xl mx-auto px-4 text-center rounded-lg">
-        <div class="flex items-center w-full">
-            
-            <!-- HR Kiri -->
-            <hr class="flex-grow border-t-4 border-blue-900">
+  <div class="max-w-4xl mx-auto px-4 text-center rounded-lg w-full">
 
-            <!-- Tombol di Tengah -->
-            <a href="{{ route('contents') }}" 
-               class="mx-6 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-gray-900 transition shadow">
-                Semua Konten
-                <i class="fas fa-th-list ml-2"></i>
-            </a>
+    <div class="flex items-center w-full">
+      <!-- Garis kiri -->
+      <span class="flex-grow border-t-2 border-gray-400"></span>
 
-            <!-- HR Kanan -->
-            <hr class="flex-grow border-t-4 border-blue-600">
-        </div>
+      <!-- Tombol di tengah (ukuran sesuai button saja) -->
+      <div class="px-4 shrink-0">
+        <a href="{{ route('contents') }}" 
+           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-gray-900 transition shadow">
+          Semua Konten
+          <i class="fas fa-th-list ml-2"></i>
+        </a>
+      </div>
+
+      <!-- Garis kanan -->
+      <span class="flex-grow border-t-2 border-gray-400"></span>
     </div>
+
+  </div>
 </section>
+
 
 
 
