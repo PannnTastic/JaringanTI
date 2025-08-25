@@ -103,138 +103,201 @@
         </div>
     </header>
 
-    <!-- Slideshow Atas Hero Section -->
-    @if(isset($slides) && $slides->count() > 0)
-    <div id="content-slideshow" class="mt-6 relative max-w-4xl mx-auto w-full px-4">
-        <div class="overflow-hidden rounded-lg border border-blue-200 relative h-40 md:h-56 lg:h-64 flex items-center justify-center bg-white">
-            <div class="slides flex transition-transform duration-700 h-full items-center" style="width: {{ $slides->count() * 100 }}%">
-                @foreach($slides as $slide)
-                    <div class="slide w-full flex-shrink-0 flex items-center justify-center h-full" style="flex: 0 0 100%;">
-                        <img src="{{ asset('storage/' . $slide->content_photo) }}" alt="{{ $slide->content_title }}" class="w-full h-full object-cover">
-                    </div>
-                @endforeach
-            </div>
-            <button id="prevSlide" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 rounded-full p-2 shadow z-10 border border-blue-200 hover:bg-blue-100 flex items-center justify-center">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button id="nextSlide" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 rounded-full p-2 shadow z-10 border border-blue-200 hover:bg-blue-100 flex items-center justify-center">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        <!-- Dots -->
-        <div class="flex justify-center gap-2 mt-2" id="slide-dots">
-            @for($i = 0; $i < $slides->count(); $i++)
-                <button class="dot w-2.5 h-2.5 rounded-full bg-blue-300 transition-all" data-index="{{ $i }}"></button>
-            @endfor
-        </div>
+
+
+<!-- Hero Section -->
+<section class="bg-blue-600 flex p-10 lg:p-16 items-center lg:justify-center flex-col  shadow-md mb-8">
+    <div class="max-w-4xl mx-auto px-2 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">
+            Seputar Jaringan TI
+        </h2>
+        <p class="mb-4 text-lg text-blue-100">
+            PT PLN Batam Gardu Induk Sei Baloi dan PLTD Baloi
+        </p>
+        
     </div>
-    <script>
-        (function(){
-            // Scope everything to the slideshow container to avoid duplicate-ID collisions
-            const container = document.getElementById('content-slideshow');
-            if (!container) return;
+</section>
 
-            const slidesEl = container.querySelector('.slides');
-            const dotsContainer = container.querySelector('#slide-dots');
-            const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.dot')) : [];
-            const prevBtn = container.querySelector('#prevSlide');
-            const nextBtn = container.querySelector('#nextSlide');
 
-            const total = {{ $slides->count() }};
-            if (!slidesEl || total === 0) return;
 
-            // If only one slide, hide controls and dots
-            if (total === 1) {
-                if (prevBtn) prevBtn.style.display = 'none';
-                if (nextBtn) nextBtn.style.display = 'none';
-                if (dotsContainer) dotsContainer.style.display = 'none';
-                return;
-            }
 
-            let index = 0;
-            let timer = null;
 
-            function move() {
-                // Use exact percentage arithmetic to match slide widths
-                const percent = index * (100 / total);
-                slidesEl.style.transform = `translateX(-${percent}%)`;
 
-                dots.forEach((dot, i) => {
-                    dot.classList.toggle('bg-blue-600', i === index);
-                    dot.classList.toggle('bg-blue-300', i !== index);
-                });
-            }
+<!-- Slideshow Atas Hero Section -->
+@if(isset($slides) && $slides->count() > 0)
+<div id="content-slideshow" class="mt-6 relative max-w-4xl mx-auto w-full px-4">
+    <div class="overflow-hidden relative w-full h-64 md:h-80 lg:h-[32rem] rounded-lg border border-blue-200">
+        <!-- Wrapper slides -->
+        <div class="slides flex transition-transform duration-700 h-full w-full">
+            @foreach($slides as $slide)
+                <div class="slide w-full flex-shrink-0 h-full relative">
+                    <!-- Gambar -->
+                    <img src="{{ asset('storage/' . $slide->content_photo) }}" 
+                         alt="{{ $slide->content_title }}" 
+                         class="w-full h-full object-cover object-center">
 
-            function goTo(i) {
-                if (typeof i !== 'number') return;
-                index = ((i % total) + total) % total; // normalize
-                move();
-                resetAutoplay();
-            }
+                    <!-- Overlay teks -->
+<div class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-center px-4">
+    <h3 class="text-white text-xl md:text-2xl font-bold drop-shadow-sm mb-3 
+               max-w-[90%] md:max-w-2xl mx-auto break-words">
+        {{ $slide->content_title }}
+    </h3>
+    <p class="text-white text-sm md:text-base drop-shadow-sm 
+              max-w-[90%] md:max-w-2xl mx-auto leading-relaxed break-words">
+        {{ $slide->content_description }}
+    </p>
+</div>
+                </div>
+            @endforeach
+        </div>
 
-            if (prevBtn) {
-                prevBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    goTo(index - 1);
-                });
-            }
+        <!-- Tombol Prev -->
+        <button id="prevSlide" 
+                class="absolute left-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow z-10 border border-blue-200 hover:bg-blue-100 flex items-center justify-center">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <!-- Tombol Next -->
+        <button id="nextSlide" 
+                class="absolute right-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow z-10 border border-blue-200 hover:bg-blue-100 flex items-center justify-center">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
 
-            if (nextBtn) {
-                nextBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    goTo(index + 1);
-                });
-            }
+    <!-- Dots indikator -->
+    <div class="flex justify-center gap-2 mt-2" id="slide-dots">
+        @for($i = 0; $i < $slides->count(); $i++)
+            <button class="dot w-2.5 h-2.5 rounded-full bg-blue-300 transition-all" data-index="{{ $i }}"></button>
+        @endfor
+    </div>
+</div>
 
-            dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+<!-- Script -->
+<script>
+    (function(){
+        const container = document.getElementById('content-slideshow');
+        if (!container) return;
 
-            function resetAutoplay() {
-                if (timer) clearInterval(timer);
-                timer = setInterval(() => { goTo(index + 1); }, 4000);
-            }
+        const slidesEl = container.querySelector('.slides');
+        const dotsContainer = container.querySelector('#slide-dots');
+        const dots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.dot')) : [];
+        const prevBtn = container.querySelector('#prevSlide');
+        const nextBtn = container.querySelector('#nextSlide');
 
-            // initialize
+        const total = {{ $slides->count() }};
+        if (!slidesEl || total === 0) return;
+
+        if (total === 1) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+            if (dotsContainer) dotsContainer.style.display = 'none';
+            return;
+        }
+
+        let index = 0;
+        let timer = null;
+
+        function move() {
+            const slide = slidesEl.querySelector('.slide');
+            const slideWidth = slide ? slide.offsetWidth : 0;
+            slidesEl.style.transform = `translateX(-${index * slideWidth}px)`;
+
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('bg-blue-600', i === index);
+                dot.classList.toggle('bg-blue-300', i !== index);
+            });
+        }
+
+        function goTo(i, manual = false) {
+            if (typeof i !== 'number') return;
+            index = ((i % total) + total) % total;
             move();
-            resetAutoplay();
-        })();
-    </script>
-    @else
-    <div class="mt-6 text-center text-blue-200 text-sm">Belum ada foto konten untuk ditampilkan.</div>
-    @endif
+            if (manual) resetAutoplay();
+        }
 
-    <!-- Hero Section -->
-    <section class="bg-blue-600 text-white  flex p-6 lg:p-8 items-center lg:justify-center flex-col">
-        <div class="max-w-4xl mx-auto px-4 text-center rounded-lg">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">Seputar Jaringan TI</h2>
-            <p class="text-blue-100 mb-2 text-lg">PT PLN Batam Gardu Induk Sei Baloi dan PLTD Baloi</p>
-            <a href="{{ route('contents') }}" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+        if (prevBtn) {
+            prevBtn.addEventListener('click', e => {
+                e.preventDefault();
+                goTo(index - 1, true);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', e => {
+                e.preventDefault();
+                goTo(index + 1, true);
+            });
+        }
+
+        dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i, true)));
+
+        function resetAutoplay() {
+            if (timer) clearInterval(timer);
+            timer = setInterval(() => goTo(index + 1), 4000);
+        }
+
+        // Init
+        window.addEventListener('resize', move);
+        move();
+        resetAutoplay();
+    })();
+</script>
+@else
+<div class="mt-6 text-center text-blue-200 text-sm">
+    Belum ada foto konten untuk ditampilkan.
+</div>
+@endif
+
+
+<!-- Hero Section -->
+<section class="flex p-6 lg:p-8 items-center lg:justify-center flex-col bg-white">
+    <div class="max-w-4xl mx-auto px-4 text-center rounded-lg">
+        <div class="flex items-center w-full">
+            
+            <!-- HR Kiri -->
+            <hr class="flex-grow border-t-4 border-blue-900">
+
+            <!-- Tombol di Tengah -->
+            <a href="{{ route('contents') }}" 
+               class="mx-6 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-gray-900 transition shadow">
                 Semua Konten
                 <i class="fas fa-th-list ml-2"></i>
             </a>
+
+            <!-- HR Kanan -->
+            <hr class="flex-grow border-t-4 border-blue-600">
+        </div>
+    </div>
+</section>
+
+
+
+
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Aplikasi Jaringan TI -->
+    <section class="bg-blue-600 rounded-2xl shadow-md p-8 mb-16">
+        <h3 class="text-2xl font-bold text-white mb-8 text-center">Aplikasi Jaringan TI</h3>
+        <div class="flex flex-wrap justify-center gap-4 mb-6">
+            @foreach($apps as $app)
+                <a href="{{ $app->app_url }}" target="_blank" 
+                   class="flex items-center px-4 py-2 bg-white text-blue-700 rounded-lg shadow hover:bg-blue-50 transition">
+                    {!! $app->app_icon !!}
+                    <span class="ml-2">{{ $app->app_name }}</span>
+                </a>
+            @endforeach
         </div>
     </section>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        <!-- List Apps -->
-        <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Aplikasi Jaringan TI</h3>
-            <div class="flex flex-wrap justify-center gap-4 mb-6">
-
-                @foreach($apps as $app)
-                    <a href="{{ $app->app_url }}" target="_blank" class="flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg shadow hover:bg-blue-200 transition">
-                        {!! $app->app_icon !!}
-                        <span class="ml-2">{{ $app->app_name }}</span>
-                    </a>
-                @endforeach
-            </div>
-
-        <section class="mb-16">
-            <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Kategori Knowledge Base</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($categories as $category)
+    <!-- Kategori Knowledge Base -->
+    <section class="bg-blue-600 rounded-2xl shadow-md p-8 mb-16">
+        <h3 class="text-2xl font-bold text-white mb-8 text-center">Kategori Knowledge Base</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach($categories as $category)
                 <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border category-card" 
-                     data-category="{{ $category->field_id }}" data-url="{{ route('kbs', $category->field_id) }}">
+                     data-category="{{ $category->field_id }}" 
+                     data-url="{{ route('kbs', $category->field_id) }}">
                     <div class="p-6">
                         <div class="flex items-center mb-4">
                             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
@@ -242,7 +305,7 @@
                             </div>
                             <div>
                                 <h4 class="font-semibold text-gray-900">{{ $category->field_name }}</h4>
-                                <p class="text-sm text-gray-600">{{ $category->knowledgebase->count() }} Knowloedgebase</p>
+                                <p class="text-sm text-gray-600">{{ $category->knowledgebase->count() }} Knowledgebase</p>
                             </div>
                         </div>
                         <div class="flex items-center text-blue-600 text-sm font-medium">
@@ -251,10 +314,12 @@
                         </div>
                     </div>
                 </div>
-                @endforeach
-            </div>
-        </section>
-    </main>
+            @endforeach
+        </div>
+    </section>
+
+</main>
+
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-12">
