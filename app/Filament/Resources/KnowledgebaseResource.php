@@ -59,7 +59,8 @@ class KnowledgebaseResource extends Resource
             ->columns([
                 
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Nama Penulis'),
+                    ->label('Nama Penulis')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('kb_name')
                     ->label('Nama Knowledgebase')
                     ->searchable(),

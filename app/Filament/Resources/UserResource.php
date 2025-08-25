@@ -45,7 +45,7 @@ class UserResource extends Resource
                     ->label('Bidang')
                     ->relationship('field', 'field_name')
                     
-                    ->required(),
+                    ,
                 Forms\Components\TextInput::make('email')
                     ->label('Email')
                     ->email()

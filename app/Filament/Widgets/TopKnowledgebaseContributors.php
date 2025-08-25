@@ -79,9 +79,21 @@ class TopKnowledgebaseContributors extends BaseWidget
                     ->color('info'),
             ])
             ->actions([
-                Tables\Actions\Action::make('view_articles')
-                    ->label('Lihat Artikel')
+                Tables\Actions\Action::make('view_latest_article')
+                    ->label('Lihat Artikel Terbaru')
                     ->icon('heroicon-o-eye')
+                    ->url(function ($record) {
+                        // Cari artikel terbaru dari user ini
+                        $latestKb = Knowledgebase::where('user_id', $record->user_id)
+                            ->orderBy('created_at', 'desc')
+                            ->first();
+                        
+                        return $latestKb ? '/kb/' . $latestKb->kb_id : '#';
+                    })
+                    ->openUrlInNewTab(),
+                Tables\Actions\Action::make('view_all_articles')
+                    ->label('Lihat Semua Artikel')
+                    ->icon('heroicon-o-document-text')
                     ->url(fn ($record) => '/admin/knowledgebases?tableSearch=' . urlencode($record->name))
                     ->openUrlInNewTab()
             ])
