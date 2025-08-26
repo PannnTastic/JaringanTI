@@ -16,6 +16,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class StatsOverview extends BaseWidget
 {
     protected int | string | array $columnSpan = 'full';
+    protected static ?int $sort = 1;
 
     // Harus return int (sesuai parent), jangan ubah ke union.
     protected function getColumns(): int

@@ -12,6 +12,7 @@ class UserFieldChart extends ChartWidget
 
     protected static ?string $pollingInterval = '10s';
 
+    protected static ?int $sort = 3;
     public function getHeading(): string
     {
         return 'Pengguna per Bidang';

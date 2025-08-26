@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class TopKnowledgebaseContributors extends BaseWidget
 {
     protected static ?string $heading = 'Top Contributors Bulan Ini';
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 2;
     
     public function table(Table $table): Table
     {

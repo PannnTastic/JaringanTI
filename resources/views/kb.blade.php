@@ -106,17 +106,17 @@
 
 
 <!-- Hero Section -->
-<section class="bg-blue-600 flex p-10 lg:p-16 items-center lg:justify-center flex-col  shadow-md mb-8">
-    <div class="max-w-4xl mx-auto px-2 text-center">
-        <h2 class="text-3xl md:text-4xl font-bold mb-4 text-white">
+<section class="bg-blue-600 flex flex-col items-center justify-center text-center px-6 py-20 shadow-lg mb-12 rounded-b-3xl">
+    <div class="max-w-3xl mx-auto">
+        <h2 class="text-3xl md:text-5xl font-extrabold mb-6 text-white drop-shadow-lg">
             Seputar Jaringan TI
         </h2>
-        <p class="mb-4 text-lg text-blue-100">
+        <p class="text-lg md:text-xl text-blue-100">
             PT PLN Batam Gardu Induk Sei Baloi dan PLTD Baloi
         </p>
-        
     </div>
 </section>
+
 
 
 
@@ -137,16 +137,21 @@
                          class="w-full h-full object-cover object-center">
 
                     <!-- Overlay teks -->
-<div class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-center px-4">
+<div class="absolute inset-0 bg-black/30 flex flex-col items-center justify-end text-center px-4 pb-6">
     <h3 class="text-white text-xl md:text-2xl font-bold drop-shadow-sm mb-3 
                max-w-[90%] md:max-w-2xl mx-auto break-words">
         {{ $slide->content_title }}
     </h3>
     <p class="text-white text-sm md:text-base drop-shadow-sm 
-              max-w-[90%] md:max-w-2xl mx-auto leading-relaxed break-words">
+              max-w-[90%] md:max-w-2xl mx-auto leading-relaxed break-words mb-2">
         {{ $slide->content_description }}
     </p>
+    <p class="text-white text-xs md:text-sm drop-shadow-sm 
+              max-w-[90%] md:max-w-2xl mx-auto leading-relaxed break-words">
+        {{ $slide->user_id ? 'Oleh: ' . $slide->user->name : '' }}
+    </p>
 </div>
+
                 </div>
             @endforeach
         </div>
@@ -326,7 +331,7 @@
 
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-12">
+    <footer class="bg-gray-800 text-white py-12  rounded-t-3xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>

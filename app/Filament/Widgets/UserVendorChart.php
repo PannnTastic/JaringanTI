@@ -14,7 +14,7 @@ class UserVendorChart extends ChartWidget
 {
     protected static ?string $heading = 'Statistik Data';
     
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 8;
 
     protected function getData(): array
     {

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class KnowledgebaseMonthlyStats extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
     
     protected function getStats(): array
     {

@@ -13,7 +13,7 @@ class LatestActivity extends Widget
 {
     protected static string $view = 'filament.widgets.latest-activity';
     
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 9;
     
     protected int | string | array $columnSpan = 'full';
 
