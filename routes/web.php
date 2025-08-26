@@ -1,8 +1,9 @@
 <?php
 
-
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Http\Controllers\UserController;
 
 // Route::redirect('/', 'admin');
 
@@ -86,6 +87,8 @@ Route::get('/contents', function () {
         ->get();
     return view('contents', compact('contents'));
 })->name('contents');
+
+Route::get('/user', [UserController::class, 'index'])->name('users');
 
 
 

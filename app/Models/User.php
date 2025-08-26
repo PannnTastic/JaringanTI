@@ -78,7 +78,7 @@ class User extends Authenticatable
     }
     public function field()
     {
-        return $this->hasMany(Field::class, 'field_id', 'field_id');
+        return $this->belongsTo(Field::class, 'field_id', 'field_id');
     }
 
     public function hasPermission(string $permission): bool

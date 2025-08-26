@@ -88,6 +88,10 @@ use App\Filament\Pages\Notifications;
                     ->label('Edit Profile')
                     ->url(fn () => Filament::getPanel('admin')->getProfileUrl())
                     ->icon('heroicon-o-user-circle'),
+                MenuItem::make()
+                    ->label('Seputar JARTI')
+                    ->url('/')
+                    ->icon('heroicon-o-information-circle')
             ])
 
 
