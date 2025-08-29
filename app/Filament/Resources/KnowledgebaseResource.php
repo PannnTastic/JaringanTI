@@ -27,14 +27,14 @@ class KnowledgebaseResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('kb_name')
-                    ->label('Nama Knowledgebase')
+                    ->label('Nama Pengetahuan')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Toggle::make('kb_status')
-                    ->label('Status Knowledgebase')
+                    ->label('Status Pengetahuan')
                     ->required(),
                 Forms\Components\Select::make('field_id')
-                    ->label('Kategori Knowledgebase')
+                    ->label('Kategori Pengetahuan')
                     ->required()
                     ->relationship('category', 'field_name'),
                 Forms\Components\Select::make('user_id')
@@ -45,7 +45,7 @@ class KnowledgebaseResource extends Resource
                     ->required()
                     ->relationship('user','name'),
                 Forms\Components\RichEditor::make('kb_content')
-                    ->label('Konten Knowledgebase')
+                    ->label('Konten Pengetahuan')
                     ->required()
                     ->fileAttachmentsDirectory('uploads') // folder di storage/app/public/uploads
                     ->fileAttachmentsVisibility('public')
