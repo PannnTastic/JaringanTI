@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
             // buat belongto ke substation
             $table->foreignId('substation_id')->constrained('substations', 'substation_id')->onDelete('cascade');
+            $table->foreignId('id_penyerapan')->constrained('penyerapan', 'id_penyerapan')->onDelete('cascade');
             
         });
     }

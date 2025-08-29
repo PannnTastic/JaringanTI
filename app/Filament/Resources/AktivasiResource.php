@@ -110,12 +110,33 @@ class AktivasiResource extends Resource
                 TextInput::make('substation_work')
                     ->label('Hari Kerja')
                     ->maxLength(255),
-                    
-                TextInput::make('substation_rab')
-                    ->label('RAB')
-                    ->numeric()
-                    ->prefix('Rp.'),
 
+                TextInput::make('substation_material')
+                    ->label('Material')
+                    ->numeric()
+                    ->prefix('Rp.')
+                    ->afterStateUpdated(function (callable $set, callable $get) {
+                        $material = (float) $get('substation_material');
+                        $jasa = (float) $get('substation_jasa');
+                        $set('substation_rab', $material + $jasa);
+                        })
+                    ->live(),
+                TextInput::make('substation_jasa')
+                    ->label('Jasa')
+                    ->numeric()
+                    ->prefix('Rp.')
+                    ->afterStateUpdated(function (callable $set, callable $get) {
+                        $material = (float) $get('substation_material');
+                        $jasa = (float) $get('substation_jasa');
+                        $set('substation_rab', $material + $jasa);
+                    })
+                    ->live(),
+                TextInput::make('substation_rab')
+                     ->label('RAB')
+                    ->numeric()
+                    ->prefix('Rp.')
+                    ->disabled()
+                    ->dehydrated(),
                 Select::make('substation_licensing')
                     ->label('Perizinan')
                     ->options([
@@ -159,8 +180,8 @@ class AktivasiResource extends Resource
                     })
                     ->columnSpanFull(),
 
-                 Repeater::make('documents')
-                        ->relationship()
+           Repeater::make('documents')
+               ->relationship('documents')
                         ->schema([
                         TextInput::make('doc_name')
                             ->label('Nama Dokumen'),

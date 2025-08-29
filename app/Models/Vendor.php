@@ -12,5 +12,10 @@ class Vendor extends Model
 
     protected $primaryKey = 'vendor_id';
     protected $guarded = [];
-   
+
+    public function penyerapan()
+    {
+        return $this->hasMany(Penyerapan::class, 'vendor_id', 'vendor_id');
+    }
+
 }

@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('substation_petik_core')->nullable();
             $table->string('substation_work')->nullable();
             $table->string('substation_rab')->nullable();
+            $table->bigInteger('substation_material')->nullable();
+            $table->bigInteger('substation_jasa')->nullable();
             $table->string('substation_licensing')->nullable();
             $table->boolean('substation_status')->default(1);
             // bulan

@@ -28,4 +28,9 @@ class Substation extends Model
     {
         return $this->hasMany(Document::class, 'substation_id', 'substation_id');
     }
+
+    public function penyerapan()
+    {
+        return $this->hasMany(Penyerapan::class, 'substation_id', 'substation_id');
+    }
 }
