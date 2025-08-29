@@ -107,10 +107,6 @@ class DocumentResource extends Resource
                     ->options(
                         Role::pluck('role_name', 'role_id')->toArray()
                     )
-                    ->default(function(){
-                        $role = Role::where('role_name', 'Aktivasi')->first();
-                        return $role ? $role->role_id : null;
-                    })
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
