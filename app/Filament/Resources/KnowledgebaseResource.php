@@ -21,6 +21,7 @@ class KnowledgebaseResource extends Resource
     protected static ?string $model = Knowledgebase::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-book-open';
+    protected static ?string $navigationGroup = 'General';
 
     public static function form(Form $form): Form
     {

@@ -28,7 +28,7 @@ class SubstationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-bolt';
     
-    protected static ?string $navigationGroup = 'Substation Management';
+    protected static ?string $navigationGroup = 'Manajemen Gardu';
 
     public static function form(Form $form): Form
     {
@@ -114,16 +114,22 @@ class SubstationResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('substation_name')
+                    ->label('Nama Substation')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('substation_feeder')
+                    ->label('Feeder')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('substation_motorized')
+                    ->label('Motorized')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('substation_jarkom')
+                    ->label('Jarkom')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('substation_priority')
+                    ->label('Priority')
                     ->searchable(),
                     Tables\Columns\TextColumn::make('substation_terdekat')
+                    ->label('Terdekat')
                     ->searchable(),
                 // Tables\Columns\TextColumn::make('substation_fo')
                 //     ->searchable(),

@@ -26,6 +26,9 @@ class DocumentResource extends Resource
     protected static ?string $model = Document::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-clipboard-document-check';
+    protected static ?string $navigationGroup = 'General';
+    protected static ?string $navigationLabel = 'Dokumen';
+    protected static ?string $modelLabel = 'Dokumen';
 
     public static function form(Form $form): Form
     {

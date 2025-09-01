@@ -25,6 +25,10 @@ class PermitResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationLabel = 'Permohonan';
+
+    protected static ?string $modelLabel = 'Permohonan';
+
     // Urutan approval yang harus diikuti
     protected static array $approvalSequence = [
         'staff it network',

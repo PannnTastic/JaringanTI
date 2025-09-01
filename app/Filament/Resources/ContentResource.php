@@ -20,6 +20,10 @@ class ContentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-photo';
 
+    protected static ?string $navigationGroup = 'General';
+    protected static ?string $navigationLabel = 'Konten';
+    protected static ?string $modelLabel = 'Konten';
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();

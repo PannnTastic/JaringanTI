@@ -39,7 +39,8 @@ class AktivasiResource extends Resource
     protected static ?string $modelLabel = 'Aktivasi';
     
     protected static ?string $pluralModelLabel = 'Aktivasi';
-    protected static ?string $navigationGroup = 'Substation Management';
+    protected static ?string $navigationGroup = 'Manajemen Gardu';
+
     
     public static function getEloquentQuery(): Builder
     {

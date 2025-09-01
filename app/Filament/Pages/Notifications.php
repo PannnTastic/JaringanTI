@@ -19,9 +19,10 @@ class Notifications extends Page implements HasTable
 
     protected static string $view = 'filament.pages.notifications';
     
-    protected static ?string $title = 'Notifications';
-    
-    protected static ?string $navigationLabel = 'Notifications';
+    protected static ?string $title = 'Notifikasi';
+    protected static ?string $navigationGroup = 'General';
+
+    protected static ?string $navigationLabel = 'Notifikasi';
     
     protected static ?int $navigationSort = 99;
     

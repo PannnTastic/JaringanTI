@@ -20,7 +20,7 @@ class PenyerapanResource extends Resource
 {
     protected static ?string $model = Penyerapan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-circle-stack';
 
     protected static ?string $navigationGroup = 'Penyerapan';
 
@@ -98,5 +98,15 @@ class PenyerapanResource extends Resource
             'create' => Pages\CreatePenyerapan::route('/create'),
             'edit' => Pages\EditPenyerapan::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('penyerapans');
+    }
+
+    public static function canViewAny(): bool
+    {
+        return \App\Helpers\PermissionHelper::canAccessResource('penyerapans');
     }
 }
