@@ -91,8 +91,8 @@ class PembayaranResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id_penyerapan')
-                    ->label('ID Penyerapan')
+                TextColumn::make('substation.substation_name')
+                    ->label('Nama Pekerjaan')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('tahap1')

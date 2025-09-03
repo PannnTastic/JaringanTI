@@ -133,12 +133,7 @@ class AktivasiResource extends Resource
                     ->label('Material')
                     ->numeric()
                     ->prefix('Rp.')
-                    ->afterStateUpdated(function (callable $set, callable $get) {
-                        $material = (float) $get('substation_material');
-                        $jasa = (float) $get('substation_jasa');
-                        $set('substation_rab', $material + $jasa);
-                        })
-                    ->live(),
+                    ->live(onBlur:true),
                 TextInput::make('substation_jasa')
                     ->label('Jasa')
                     ->numeric()
@@ -148,13 +143,14 @@ class AktivasiResource extends Resource
                         $jasa = (float) $get('substation_jasa');
                         $set('substation_rab', $material + $jasa);
                     })
-                    ->live(),
+                    ->live(onBlur:true),
                 TextInput::make('substation_rab')
                      ->label('RAB')
                     ->numeric()
                     ->prefix('Rp.')
                     ->disabled()
-                    ->dehydrated(),
+                    ->dehydrated()
+                    ,
                 Select::make('substation_licensing')
                     ->label('Perizinan')
                     ->options([

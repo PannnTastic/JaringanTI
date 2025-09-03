@@ -43,7 +43,8 @@ class SPKResource extends Resource
                         'Backbone' => 'Backbone',
                         'Migrasi' => 'Migrasi',
                         'SCADA' => 'SCADA',
-                        'UPS/BATERAI' => 'UPS/BATERAI'
+                        'UPS/BATERAI' => 'UPS/BATERAI',
+                        'Backbone & Lasmile' => 'Backbone & Lasmile'
                     ]),
                 Select::make('status_transaksi')
                     ->label('Status Transaksi')
@@ -103,8 +104,8 @@ class SPKResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id_penyerapan')
-                    ->label('ID Penyerapan')
+                TextColumn::make('substation.substation_name')
+                    ->label('Nama Pekerjaan')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('kontrak_penyerapan')

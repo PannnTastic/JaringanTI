@@ -42,9 +42,9 @@ class NotaDinasResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id_penyerapan')
-                    ->label('ID Penyerapan')
-                    ->sortable()
+                Tables\Columns\TextColumn::make('substation.substation_name')
+                    ->label('Nama Pekerjaan')
+                    
                     ->searchable(),
                 Tables\Columns\TextColumn::make('tanggal_nota_dinas')
                     ->label('Tanggal Nota Dinas')
