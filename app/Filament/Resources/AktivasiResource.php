@@ -48,18 +48,35 @@ class AktivasiResource extends Resource
         
         $user = Auth::user();
         if ($user) {
-            // Untuk role "aktivasi", tampilkan:
-            // 1. Substation yang belum ada user_id (untuk diambil/diaktivasi)
-            // 2. Substation yang sudah diaktivasi oleh user ini (untuk diedit)
             $userRole = \App\Models\User::with('role')->find(Auth::id());
-            if ($userRole && $userRole->role && strtolower($userRole->role->role_name) === 'aktivasi') {
-                $query->where(function($q) {
-                    $q->whereNull('user_id')
-                      ->orWhere('user_id', Auth::id());
-                });
-            } else {
-                // Role lain: hanya tampilkan yang sudah diaktivasi
-                $query->whereNotNull('user_id');
+            if ($userRole && $userRole->role) {
+                $roleName = strtolower($userRole->role->role_name);
+                
+                // Admin dan Administrator bisa melihat semua aktivasi (status 0 atau 1)
+                if (in_array($roleName, ['admin', 'administrator'])) {
+                    // Tampilkan semua dengan status 0 atau 1
+                    $query->whereIn('substation_status', [0, 1]);
+                }
+                // Untuk role "aktivasi", tampilkan:
+                // 1. Substation dengan status 0 yang belum ada user_id (untuk diambil/diaktivasi)
+                // 2. Substation dengan status 0 atau 1 yang sudah diaktivasi oleh user ini (untuk diedit)
+                elseif ($roleName === 'aktivasi') {
+                    $query->where(function($q) {
+                        $q->where(function($subQ) {
+                            // Status 0 dan belum ada user_id
+                            $subQ->where('substation_status', 0)
+                                 ->whereNull('user_id');
+                        })->orWhere(function($subQ) {
+                            // Status 0 atau 1 dan sudah diaktivasi oleh user ini
+                            $subQ->whereIn('substation_status', [0, 1])
+                                 ->where('user_id', Auth::id());
+                        });
+                    });
+                } else {
+                    // Role lain: hanya tampilkan yang sudah diaktivasi dengan status 0 atau 1
+                    $query->whereIn('substation_status', [0, 1]);
+                          
+                }
             }
         }
         
