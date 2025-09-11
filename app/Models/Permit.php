@@ -15,6 +15,9 @@ class Permit extends Model
 
     protected $guarded = [];
 
+    protected $with = ['users', 'substations', 'approvers'];
+    protected $withCount = ['approvers'];
+
     protected $casts = [
         'rejected_at' => 'datetime',
     ];
