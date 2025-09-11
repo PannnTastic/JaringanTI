@@ -77,7 +77,8 @@ class DocumentResource extends Resource
                     //         ])
                             ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX, XLS, XLSX, VSD, VSDX.')
                             ->columnSpanFull()
-                            ->rules(['mimes:pdf,png,jpg,jpeg,doc,docx,xls,xlsx,vsd,vsdx,zip' ])
+                            ->maxSize(102400)
+                            // ->rules(['mimes:pdf,png,jpg,jpeg,doc,docx,xls,xlsx,vsd,vsdx,zip' ])
                     
             ]);
     }
@@ -164,14 +165,11 @@ class DocumentResource extends Resource
                     })
                     ->visible(fn (Document $record) => !empty($record->doc_file)),
 
-                // Action View File
-                Tables\Actions\Action::make('view')
+                // Action View Document
+                Tables\Actions\ViewAction::make()
                     ->label('Lihat')
                     ->icon('heroicon-o-eye')
-                    ->color('info')
-                    ->url(fn (Document $record) => $record->doc_file ? Storage::url($record->doc_file) : null)
-                    ->openUrlInNewTab()
-                    ->visible(fn (Document $record) => !empty($record->doc_file)),
+                    ->color('info'),
 
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
@@ -197,6 +195,7 @@ class DocumentResource extends Resource
         return [
             'index' => Pages\ListDocuments::route('/'),
             'create' => Pages\CreateDocument::route('/create'),
+            'view' => Pages\ViewDocument::route('/{record}'),
             'edit' => Pages\EditDocument::route('/{record}/edit'),
         ];
     }

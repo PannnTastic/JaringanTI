@@ -559,6 +559,58 @@ class PermitResource extends Resource
                     ->wrap()
                     ->visible(fn (?Permit $record) => $record?->getAttribute('permit_status') == -1)
                     ->color('danger'),
+                Tables\Columns\TextColumn::make('substation_documents')
+                    ->label('Dokumen Substation')
+                    ->getStateUsing(function (?Permit $record) {
+                        if (!$record || !$record->substations) {
+                            return 'Tidak ada substation';
+                        }
+                        
+                        $documents = $record->substations->documents;
+                        
+                        if ($documents->isEmpty()) {
+                            return 'Belum ada dokumen';
+                        }
+                        
+                        return $documents->count() . ' dokumen tersedia';
+                    })
+                    ->badge()
+                    ->color(function (?Permit $record) {
+                        if (!$record || !$record->substations) {
+                            return 'gray';
+                        }
+                        
+                        $documentCount = $record->substations->documents->count();
+                        
+                        if ($documentCount == 0) {
+                            return 'danger';
+                        } elseif ($documentCount < 3) {
+                            return 'warning';
+                        } else {
+                            return 'success';
+                        }
+                    })
+                    ->tooltip(function (?Permit $record) {
+                        if (!$record || !$record->substations || $record->substations->documents->isEmpty()) {
+                            return 'Klik action "Lihat Dokumen" untuk melihat detail dokumen';
+                        }
+                        
+                        $documents = $record->substations->documents->take(5); // Show max 5 documents in tooltip
+                        $docNames = $documents->pluck('doc_name')->implode("\n• ");
+                        $moreCount = $record->substations->documents->count() - 5;
+                        
+                        $tooltip = "Dokumen tersedia:\n• " . $docNames;
+                        
+                        if ($moreCount > 0) {
+                            $tooltip .= "\n... dan " . $moreCount . " dokumen lainnya";
+                        }
+                        
+                        $tooltip .= "\n\nKlik action 'Lihat Dokumen' untuk detail lengkap";
+                        
+                        return $tooltip;
+                    })
+                    ->searchable(false)
+                    ->sortable(false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -705,9 +757,48 @@ class PermitResource extends Resource
                             default => $query
                         };
                     }),
+                Tables\Filters\SelectFilter::make('substation_documents')
+                    ->label('Status Dokumen Substation')
+                    ->options([
+                        'has_documents' => 'Ada Dokumen',
+                        'no_documents' => 'Belum Ada Dokumen',
+                        'few_documents' => 'Dokumen Terbatas (< 3)',
+                        'many_documents' => 'Dokumen Lengkap (≥ 3)'
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!isset($data['value']) || $data['value'] === '') {
+                            return $query;
+                        }
+                        
+                        return match($data['value']) {
+                            'has_documents' => $query->whereHas('substations.documents'),
+                            'no_documents' => $query->whereDoesntHave('substations.documents'),
+                            'few_documents' => $query->whereHas('substations', function ($q) {
+                                $q->withCount('documents')
+                                  ->having('documents_count', '<', 3)
+                                  ->having('documents_count', '>', 0);
+                            }),
+                            'many_documents' => $query->whereHas('substations', function ($q) {
+                                $q->withCount('documents')
+                                  ->having('documents_count', '>=', 3);
+                            }),
+                            default => $query
+                        };
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('view_substation_documents')
+                    ->label('Lihat Dokumen')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->visible(fn (?Permit $record) => $record?->substations?->documents?->count() > 0)
+                    ->url(fn (?Permit $record) => $record?->substations ? 
+                        \App\Filament\Resources\SubstationResource::getUrl('view_documents', [
+                            'record' => $record->substations,
+                            'from' => 'permit'
+                        ]) : null)
+                    ->openUrlInNewTab(false),
                 Tables\Actions\Action::make('approver_status')
                     ->label('Approve')
                     ->action(function (?Permit $record) {

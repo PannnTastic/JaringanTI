@@ -116,4 +116,18 @@ Route::middleware(['auth'])->group(function () {
     })->name('profile');
 });
 
+// Route untuk serving file storage ketika web server tidak bisa akses langsung
+Route::get('/storage/{path}', function ($path) {
+    $filePath = storage_path('app/public/' . $path);
+    
+    if (!file_exists($filePath)) {
+        abort(404, 'File not found');
+    }
+    
+    $mimeType = mime_content_type($filePath);
+    return response()->file($filePath, [
+        'Content-Type' => $mimeType,
+    ]);
+})->where('path', '.*')->name('storage.local');
+
 require __DIR__.'/auth.php';

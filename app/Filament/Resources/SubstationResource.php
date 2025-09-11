@@ -245,6 +245,7 @@ class SubstationResource extends Resource
             'create' => Pages\CreateSubstation::route('/create'),
             'edit' => Pages\EditSubstation::route('/{record}/edit'),
             'activation' => Pages\Activation::route('/activation'),
+            'view_documents' => Pages\ViewSubstationDocuments::route('/{record}/documents'),
         ];
     }
     public static function getEloquentQuery(): Builder

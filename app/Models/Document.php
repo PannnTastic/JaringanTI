@@ -24,5 +24,30 @@ class Document extends Model
     public function substations() {
         return $this->belongsTo(Substation::class, 'substation_id', 'substation_id');
     }
+    
+    /**
+     * Get the full URL for the document file
+     */
+    public function getFileUrlAttribute(): ?string
+    {
+        if (!$this->doc_file) {
+            return null;
+        }
+        
+        // Use custom route for serving files
+        return route('storage.local', ['path' => $this->doc_file]);
+    }
+    
+    /**
+     * Check if file exists in storage
+     */
+    public function fileExists(): bool
+    {
+        if (!$this->doc_file) {
+            return false;
+        }
+        
+        return \Illuminate\Support\Facades\Storage::disk('public')->exists($this->doc_file);
+    }
 }
 
