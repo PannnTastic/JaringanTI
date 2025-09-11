@@ -77,7 +77,7 @@ class DocumentResource extends Resource
                     //         ])
                             ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX, XLS, XLSX, VSD, VSDX.')
                             ->columnSpanFull()
-                            ->rules(['mimes:pdf,png,jpg,jpeg,doc,docx,xls,xlsx,vsd,vsdx,zip' ])
+                            // ->rules(['mimes:pdf,png,jpg,jpeg,doc,docx,xls,xlsx,vsd,vsdx,zip' ])
                     
             ]);
     }

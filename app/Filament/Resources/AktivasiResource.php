@@ -243,12 +243,14 @@ class AktivasiResource extends Resource
                             // ])
                             ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX, XLS, XLSX, VSD, VSDX.')
                             ->columnSpanFull()
-                            ->rules([
-                                // extension-based check
-                                'mimes:pdf,png,jpg,jpeg,doc,docx,xls,xlsx,vsd,vsdx,zip',
-                                // explicit MIME types fallback (vsdx often detected as zip/octet)
-                                // 'mimetypes:application/pdf,application/png,application/jpeg,application/jpg,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.visio,application/vnd.ms-visio,application/vnd.ms-visio.drawing,application/vnd.ms-visio.viewer,application/zip,application/x-zip-compressed,application/octet-stream',
-                            ])
+                            // ->rules([
+                            //     // extension-based check
+                            //     'mimes:pdf,png,jpg,jpeg,doc,docx,xls,xlsx,vsd,vsdx,zip',
+                            //     // explicit MIME types fallback (vsdx often detected as zip/octet)
+                            //     // 'mimetypes:application/pdf,application/png,application/jpeg,application/jpg,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.visio,application/vnd.ms-visio,application/vnd.ms-visio.drawing,application/vnd.ms-visio.viewer,application/zip,application/x-zip-compressed,application/octet-stream',
+                            // ])
+                            ->maxSize(102400) // Maksimum 10MB
+                            
                     ]),
 
                     Forms\Components\RichEditor::make('substation_info')
