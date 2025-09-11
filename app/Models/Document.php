@@ -14,6 +14,7 @@ class Document extends Model
     protected $primaryKey = 'doc_id';
 
     protected $guarded = [];
+    protected $with = ['user','substations'];
 
     public function user() {
         return $this->belongsTo(User::class,'user_id','user_id');

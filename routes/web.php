@@ -41,7 +41,11 @@ Route::get('/categories/{field:field_id}', function ($fieldId) {
     return view('kbs', compact('categories', 'allKnowledge'));
 })->name('kbs');
 
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 
+Route::post('/login', [\App\Http\Controllers\AuthController::class, 'proses_login'])->name('proses_login');
 Route::get('/kb/{kb:kb_id}', function ($kbId) {
     $kb = \App\Models\Knowledgebase::with('category')->findOrFail($kbId);
     

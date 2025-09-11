@@ -5,6 +5,10 @@ namespace App\Filament\Resources\PermitResource\Pages;
 use Filament\Actions;
 use App\Filament\Resources\PermitResource;
 use Filament\Resources\Pages\CreateRecord;
+use App\Mail\MailNotification;
+use Illuminate\Container\Attributes\Auth;
+use Illuminate\Support\Facades\Mail;
+
 
 class CreatePermit extends CreateRecord
 {
@@ -14,7 +18,11 @@ class CreatePermit extends CreateRecord
     {
         $roles = $this->data['approver_roles'] ?? [];
 
-        // Attach roles to permit dengan status awal 0 (belum disetujui)
+    $email = Auth()->user()->email;
+    // Attach roles to permit dengan status awal 0 (belum disetujui)
+    Mail::to($email)->send(new MailNotification());
+        
+   
         foreach ($roles as $roleId) {
             $this->record->approvers()->attach($roleId, [
                 'approver_status' => 0,
@@ -22,6 +30,7 @@ class CreatePermit extends CreateRecord
             ]);
         }
     }
+
 
     protected function getRedirectUrl(): string
     {

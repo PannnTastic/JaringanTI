@@ -13,6 +13,10 @@ class Substation extends Model
     protected $primaryKey = 'substation_id';
     protected $guarded = [];
 
+    protected $with = ['user','pops'];
+
+    protected $withCount = ['documents','penyerapan'];
+
     // Relationship dengan User
     public function user()
     {

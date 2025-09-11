@@ -2,36 +2,31 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Pages;
-use Filament\Panel;
-use Filament\Widgets;
-use Filament\PanelProvider;
-use Filament\Actions\Action;
-use Filament\Enums\ThemeMode;
-use Filament\Facades\Filament;
-use Filament\Navigation\MenuItem;
-use Filament\Support\Colors\Color;
-use Illuminate\Support\Facades\Auth;
-use App\Filament\Widgets\StatsOverview;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Widgets\LatestActivity;
+use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\UserVendorChart;
-use App\Filament\Widgets\UserFieldChart;
-use Filament\Http\Middleware\Authenticate;
-use App\Services\PermitNotificationService;
 use App\Http\Middleware\FilamentRolePermission;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Cookie\Middleware\EncryptCookies;
+use Filament\Facades\Filament;
+use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Filament\Navigation\MenuItem;
+use Filament\Pages;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use App\Filament\Pages\Notifications;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-    class AdminPanelProvider extends PanelProvider
+class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
@@ -39,8 +34,8 @@ use App\Filament\Pages\Notifications;
             ->default()
             ->id('admin')
             ->path('admin')
-            
-            ->login()
+
+            ->login(\App\Filament\Pages\Auth\Login::class)
 
             ->colors([
                 'primary' => Color::Blue,
@@ -58,15 +53,14 @@ use App\Filament\Pages\Notifications;
                 // KnowledgebaseChart::class,
                 UserVendorChart::class,
                 LatestActivity::class,
-                Widgets\AccountWidget::class,  
+                Widgets\AccountWidget::class,
             ])
             ->favicon('/img/favicon16x16.ico')
-            
+
             ->brandLogo('/img/pln batam low res (3).png')
             ->brandLogoHeight('3rem')
-        
+
             ->spa(true)
-            
 
             ->userMenuItems([
                 MenuItem::make()
@@ -79,6 +73,7 @@ use App\Filament\Pages\Notifications;
                         if ($unreadCount > 0) {
                             $label .= " ({$unreadCount})";
                         }
+
                         return $label;
                     })
                     ->url('/admin/notifications')
@@ -91,11 +86,9 @@ use App\Filament\Pages\Notifications;
                 MenuItem::make()
                     ->label('Seputar JARTI')
                     ->url('/')
-                    ->icon('heroicon-o-information-circle')
+                    ->icon('heroicon-o-information-circle'),
             ])
 
-
-            
             ->profile(EditProfile::class)
 
             ->middleware([
@@ -111,7 +104,7 @@ use App\Filament\Pages\Notifications;
             ])
             ->authMiddleware([
                 Authenticate::class,
-                FilamentRolePermission::class
+                FilamentRolePermission::class,
             ]);
     }
 }

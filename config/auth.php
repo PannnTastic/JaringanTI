@@ -61,6 +61,16 @@ return [
 
     'providers' => [
         'users' => [
+            'driver' => env('AUTH_PROVIDER_DRIVER', 'ldap'),
+            'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+
+        'ldap_users' => [
+            'driver' => 'ldap',
+            'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+
+        'eloquent_users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
@@ -111,5 +121,26 @@ return [
     */
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+
+    /*
+    |--------------------------------------------------------------------------
+    | LDAP Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure the LDAP connection settings for authentication.
+    |
+    */
+
+    'ldap' => [
+        'enabled' => env('LDAP_ENABLED', false),
+        'server' => env('LDAP_SERVER', 'ldap.example.com'),
+        'port' => env('LDAP_PORT', 389),
+        'base_dn' => env('LDAP_BASE_DN', 'dc=example,dc=com'),
+        'user_dn' => env('LDAP_USER_DN', 'uid={username},ou=users,dc=example,dc=com'),
+        'domain' => env('LDAP_DOMAIN', 'example.com'),
+        'auto_create_users' => env('LDAP_AUTO_CREATE_USERS', true),
+        'default_role_id' => env('LDAP_DEFAULT_ROLE_ID', 1),
+        'force_ldap' => env('LDAP_FORCE_AUTH', false),
+    ],
 
 ];

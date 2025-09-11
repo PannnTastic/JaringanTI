@@ -44,7 +44,15 @@ class AktivasiResource extends Resource
     
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with([
+            'user',           // Eager load user relationship
+            'pops',
+        ])
+        ->withCount([
+            'documents',      // Count documents relationship
+            'penyerapan'      // Count penyerapan relationship
+        ]);
+        
         
         $user = Auth::user();
         if ($user) {
@@ -211,19 +219,40 @@ class AktivasiResource extends Resource
                             ->directory('documents')
                             ->preserveFilenames()
                             ->previewable()
-                            ->acceptedFileTypes([
-                                'application/pdf',
-                                'image/png',
-                                'image/jpeg',
-                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                'application/msword',
+                            // ->acceptedFileTypes([
+                            //     'application/pdf',
+                            //     'image/png',
+                            //     'image/jpeg',
+                            //     'application/msword',
+                            //     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            //     // Excel
+                            //     'application/vnd.ms-excel', // .xls
+                            //     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+                            //     '.xls',
+                            //     '.xlsx',
+                            //     // Visio
+                            //     'application/vnd.visio',
+                            //     'application/vnd.ms-visio',                     // older/ambiguous
+                            //     'application/vnd.ms-visio.drawing',             // vsdx common mapping
+                            //     'application/vnd.ms-visio.viewer',    // fallback
+                            //     '.vsd',
+                            //     '.vsdx',
+                            //     'application/zip',
+                            //     'application/x-zip-compressed',
+                            //     'application/octet-stream',
+                            // ])
+                            ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX, XLS, XLSX, VSD, VSDX.')
+                            ->columnSpanFull()
+                            ->rules([
+                                // extension-based check
+                                'mimes:pdf,png,jpg,jpeg,doc,docx,xls,xlsx,vsd,vsdx,zip',
+                                // explicit MIME types fallback (vsdx often detected as zip/octet)
+                                // 'mimetypes:application/pdf,application/png,application/jpeg,application/jpg,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.visio,application/vnd.ms-visio,application/vnd.ms-visio.drawing,application/vnd.ms-visio.viewer,application/zip,application/x-zip-compressed,application/octet-stream',
                             ])
-                            ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX.'),
                     ]),
 
                     Forms\Components\RichEditor::make('substation_info')
-                ->label('Substation Info')
-                
+                ->label('Substation Info') 
                 ->fileAttachmentsDirectory('uploads')
                 ->fileAttachmentsVisibility('public')
                 ->columnSpanFull(),

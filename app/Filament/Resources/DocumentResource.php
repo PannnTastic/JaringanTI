@@ -55,14 +55,30 @@ class DocumentResource extends Resource
                     ->preserveFilenames()
                    ->previewable()
                     ->acceptedFileTypes([
-                        'application/pdf',
-                        'image/png',
-                        'image/jpeg',
-                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                        'application/msword',
-                    ])
-                    ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX'),
-               
+                                'application/pdf',
+                                'image/png',
+                                'image/jpeg',
+                                'application/msword',
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                // Excel
+                                'application/vnd.ms-excel', // .xls
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+                                '.xls',
+                                '.xlsx',
+                                // Visio
+                                'application/vnd.visio',                     // older/ambiguous
+                                'application/vnd.ms-visio',                     // older/ambiguous
+                                'application/vnd.ms-visio.drawing',             // vsdx common mapping
+                                'application/vnd.ms-visio.viewer',    // fallback
+                                '.vsd',
+                                '.vsdx',
+                                'application/zip',
+                                'application/octet-stream',
+                            ])
+                            ->helperText('Format yang didukung: PDF, PNG, JPG, JPEG, DOC, DOCX, XLS, XLSX, VSD, VSDX.')
+                            ->columnSpanFull()
+                            ->rules(['mimes:pdf,png,jpg,jpeg,doc,docx,xls,xlsx,vsd,vsdx,zip' ])
+                    
             ]);
     }
 

@@ -50,62 +50,51 @@ class SubstationResource extends Resource
                 Forms\Components\TextInput::make('substation_priority')
                     ->label('Prioritas')
                     ->numeric(),
+                Forms\Components\Select::make('pop_id')
+                    ->label('POP')
+                    ->relationship('pops', 'pop_name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
+                // Forms\Components\Select::make('user_id')
+                //     ->label('Created By')
+                //     ->relationship('user', 'name')
+                //     ->default(function () {
+                //         return \Illuminate\Support\Facades\Auth::user()?->user_id;
+                //     })
+                //     ->disabled()
+                //     ->dehydrated()
+                //     ->nullable(),
+
+                Forms\Components\Toggle::make('substation_aksesoris_WALLMOUNT_RAK')
+                    ->label('WALLMOUNT RAK')
+                    ->default(false),
+
+                Forms\Components\Toggle::make('substation_aksesoris_UPS')
+                    ->label('UPS')
+                    ->default(false),
+
+                Forms\Components\Toggle::make('substation_aksesoris_SWITCH')
+                    ->label('SWITCH')
+                    ->default(false),
+
+                Forms\Components\Toggle::make('substation_aksesoris_ONT/ONU')
+                    ->label('ONT/ONU')
+                    ->default(false),
+
+                Forms\Components\Toggle::make('substation_aksesoris_SERIAL_SERVER')
+                    ->label('SERIAL SERVER')
+                    ->default(false),
+
+                Forms\Components\Toggle::make('substation_aksesoris_POWER')
+                    ->label('ADA POWER')
+                    ->default(false),
+
                     // Forms\Components\TextInput::make('substation_terdekat')
                     // ->label('substation Terdekat')
                     // ->default('-')
                     // ->maxLength(255),
-                    
-                    
-                    // Forms\Components\Select::make('substation_fo')
-                    //     ->label('FO')
-                    //     ->required()
-                    //     ->options([
-                    //         'Selesai' => 'Selesai',
-                    //         'Survey' => 'Survey',
-                    //         'Belum' => 'Belum',
-                    //         'Progres' => 'Progres',
-                    //         'Ada' => 'Ada'
-                    //     ]),
-                    // Forms\Components\TextInput::make('substation_cable_fa')
-                    // ->label('Kabel FA')
-                    // ->prefix('MTR')
-                    // ->default(0)
-                    // ->numeric(),
-                    // Forms\Components\TextInput::make('substation_cable_fig')
-                    // ->label('Kabel FIG')
-                    // ->prefix('MTR')
-                    // ->default(0)
-                    // ->numeric(),
-                    // Forms\Components\TextInput::make('substation_petik_core')
-                    // ->label('Petik Core')
-                    // ->required()
-                    // ->maxLength(255),
-                    // Forms\Components\TextInput::make('substation_work')
-                    // ->label('Pekerjaan')
-                    // ->required()
-                    // ->maxLength(255),
-                    // Forms\Components\TextInput::make('substation_rab')
-                    // ->required()
-                    // ->maxLength(255),
-
-                    // Forms\Components\TextInput::make('substation_licensing')
-                    // ->required()
-                    // ->maxLength(255),
-
-                    // Forms\Components\Select::make('pop_id')
-                    // ->label('POP')
-                    // ->required()
-                    // ->relationship('pops','pop_name'),
-
-                    // Forms\Components\Select::make('user_id')
-                    // ->label('Nama User')
-                    // ->default(auth()->id())
-                    // ->disabled()
-                    // ->dehydrated()
-                    // ->relationship('users','name'),
-
-                    // Forms\Components\Toggle::make('substation_status')
-                    // ->required(),
+                
                 ]);
             }
             
@@ -128,47 +117,108 @@ class SubstationResource extends Resource
                 Tables\Columns\TextColumn::make('substation_priority')
                     ->label('Priority')
                     ->searchable(),
-                    Tables\Columns\TextColumn::make('substation_terdekat')
+                Tables\Columns\TextColumn::make('substation_terdekat')
                     ->label('Terdekat')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Created By')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('pops.pop_name')
+                    ->label('POP')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('documents_count')
+                    ->label('Documents')
+                    ->counts('documents')
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('penyerapan_count')
+                    ->label('Penyerapan')
+                    ->counts('penyerapan')
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Updated')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\IconColumn::make('substation_aksesoris_WALLMOUNT_RAK')
+                    ->label('WALLMOUNT_RAK')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-check-circle')
+                    ->falseIcon('heroicon-s-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+
+                Tables\Columns\IconColumn::make('substation_aksesoris_UPS')
+                    ->label('UPS')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-check-circle')
+                    ->falseIcon('heroicon-s-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+
+                Tables\Columns\IconColumn::make('substation_aksesoris_SWITCH')
+                    ->label('SWITCH')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-check-circle')
+                    ->falseIcon('heroicon-s-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+
+                Tables\Columns\IconColumn::make('substation_aksesoris_ONT/ONU')
+                    ->label('ONT/ONU')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-check-circle')
+                    ->falseIcon('heroicon-s-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+
+                Tables\Columns\IconColumn::make('substation_aksesoris_SERIAL_SERVER')
+                    ->label('SERIAL SERVER')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-check-circle')
+                    ->falseIcon('heroicon-s-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+
+                Tables\Columns\IconColumn::make('substation_aksesoris_POWER')
+                    ->label('ADA POWER')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-check-circle')
+                    ->falseIcon('heroicon-s-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+
+
+
                 // Tables\Columns\TextColumn::make('substation_fo')
                 //     ->searchable(),
                 //     Tables\Columns\TextColumn::make('substation_kabel_fa')
                 //     ->searchable(),
-                //     Tables\Columns\TextColumn::make('substation_kabel_fig')
-                //     ->searchable(),
-                //     Tables\Columns\TextColumn::make('substation_petik_core')
-                //     ->searchable(),
-                //     Tables\Columns\TextColumn::make('substation_pekerjaan')
-                //     ->searchable(),
-                //     Tables\Columns\TextColumn::make('substation_rab')
-                //     ->searchable(),
-                //     Tables\Columns\TextColumn::make('substation_perizinan')
-                //     ->searchable(),
-                //     // menambahkan bulan sebagai kolom
-                //     TextColumn::make('bulan')
-                //     ->label('POP'),
-                //     Tables\Columns\IconColumn::make('substation_status')
-                //     ->boolean(),
-                //     Tables\Columns\TextColumn::make('created_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-                //     Tables\Columns\TextColumn::make('updated_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-                //     Tables\Columns\TextColumn::make('deleted_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-                //     Tables\Columns\TextColumn::make('users.name')
-                //     ->sortable(),
-                //     Tables\Columns\TextColumn::make('pops.pop_name')
-                //         ->searchable(),
+                
             ])
-            ->filters([ 
-                TrashedFilter::make()
+            ->filters([
+                TrashedFilter::make(),
+                Tables\Filters\SelectFilter::make('pop_id')
+                    ->label('POP')
+                    ->relationship('pops', 'pop_name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('user_id')
+                    ->label('Created By')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -202,6 +252,14 @@ class SubstationResource extends Resource
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
+            ])
+            ->with([
+                'user',           // Eager load user relationship
+                'pops',           // Eager load pops relationship
+            ])
+            ->withCount([
+                'documents',      // Count documents relationship
+                'penyerapan'      // Count penyerapan relationship
             ]);
     }
 

@@ -23,6 +23,23 @@ class User extends Authenticatable
     protected $guarded = [];
 
     /**
+     * The attributes that should be fillable for LDAP users.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'username',
+        'password',
+        'email_verified_at',
+        'role_id',
+        'user_type',
+        'status',
+        'user_photo',
+    ];
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
@@ -63,10 +80,12 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
+
     public function substations()
     {
         return $this->hasMany(Substation::class, 'user_id', 'user_id');
     }
+
     public function knowledges()
     {
         return $this->hasMany(Knowledgebase::class, 'user_id', 'user_id');
@@ -76,36 +95,38 @@ class User extends Authenticatable
     {
         return $this->hasMany(Document::class, 'user_id', 'user_id');
     }
+
     public function field()
     {
         return $this->belongsTo(Field::class, 'field_id', 'field_id');
     }
 
     public function hasPermission(string $permission): bool
-{
-    if (!$this->role) {
-        return false;
+    {
+        if (! $this->role) {
+            return false;
+        }
+
+        return $this->role->permissions()
+            ->where('permission_name', $permission)
+            ->exists();
     }
-    
-    return $this->role->permissions()
-        ->where('permission_name', $permission)
-        ->exists();
-    }
-   // app/Models/User.php
+
+    // app/Models/User.php
     public function getAvatarUrlAttribute(): string
     {
         if ($this->user_photo) {
-            return Storage::disk('public')->url($this->user_photo);
+            return Storage::url($this->user_photo);
         }
 
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random';
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=random';
 
     }
 
     public function hasRole($roles): bool
     {
         // Jika tidak ada role, return false
-        if (!$this->role) {
+        if (! $this->role) {
             return false;
         }
 
@@ -140,12 +161,38 @@ class User extends Authenticatable
         if ($this->relationLoaded('role')) {
             return $this->getRelation('role');
         }
-        
+
         return $this->role()->first();
     }
 
-    public function contents(){
+    public function contents()
+    {
         return $this->hasMany(Content::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Check if user is an LDAP user
+     */
+    public function isLdapUser(): bool
+    {
+        return $this->user_type === 'ldap';
+    }
+
+    /**
+     * Get the identifier name for authentication
+     */
+    public function getAuthIdentifierName(): string
+    {
+        return 'user_id';
+    }
+
+    /**
+     * Override to support username login
+     */
+    public function findForPassport($username)
+    {
+        return $this->where('email', $username)
+            ->orWhere('username', $username)
+            ->first();
+    }
 }
