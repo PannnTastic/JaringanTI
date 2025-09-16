@@ -40,7 +40,7 @@
             <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $content->content_title }}</h1>
             <div class="mb-6 text-center">
                 @if($content->content_photo)
-                    <img src="{{ asset('storage/' . $content->content_photo) }}" alt="Foto Konten" class="rounded-lg shadow max-h-96 mx-auto">
+                    <img src="{{ asset('admin/storage/' . $content->content_photo) }}" alt="Foto Konten" class="rounded-lg shadow max-h-96 mx-auto">
                     @php
                         $size = null;
                         try {

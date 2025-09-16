@@ -19,11 +19,11 @@ class Content extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    // Accessor untuk photo URL  
+    // Accessor untuk photo URL dengan admin prefix
     public function getPhotoUrlAttribute()
     {
         if ($this->content_photo) {
-            return asset('storage/' . $this->content_photo);
+            return route('admin.storage', ['path' => $this->content_photo]);
         }
         return null;
     }

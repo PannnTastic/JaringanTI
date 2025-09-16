@@ -158,7 +158,7 @@
                             <div class="fi-input-wrp flex rounded-lg shadow-sm ring-1 ring-inset ring-gray-950/10 dark:ring-white/20">
                                 <div class="min-w-0 flex-1 px-3 py-2">
                                     <span class="block w-full text-base text-gray-950 dark:text-white">
-                                        {{ basename($document->doc_file) }}
+                                        {{ basename(\Illuminate\Support\Str::limit($document->doc_file, 63,)) }}
                                     </span>
                                 </div>
                             </div>
@@ -276,12 +276,12 @@
                                             </svg>
                                             Refresh
                                         </button>
-                                        <a href="{{ $document->file_url }}" target="_blank" class="inline-flex items-center px-3 py-2 text-xs font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700">
+                                        {{-- <a href="{{ $document->file_url }}" target="_blank" class="inline-flex items-center px-3 py-2 text-xs font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                             </svg>
                                             Buka di Tab Baru
-                                        </a>
+                                        </a> --}}
                                     </div>
                                 </div>
                                 

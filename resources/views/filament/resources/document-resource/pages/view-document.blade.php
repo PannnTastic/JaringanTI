@@ -260,12 +260,12 @@
                                             </svg>
                                             Refresh
                                         </button>
-                                        <a href="{{ $record->file_url }}" target="_blank" class="inline-flex items-center px-3 py-2 text-xs font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        {{-- <a href="{{ $record->file_url }}" target="_blank" class="inline-flex items-center px-3 py-2 text-xs font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                             </svg>
                                             Buka di Tab Baru
-                                        </a>
+                                        </a> --}}
                                     </div>
                                 </div>
                                 

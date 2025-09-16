@@ -36,8 +36,7 @@ class ViewSubstationDocuments extends ViewRecord
                 ->color('info')
                 ->url(static::$resource::getUrl('edit', ['record' => $this->record]))
                 ->visible(fn() => $fromPermit), // Hanya tampil jika dari permit
-            Actions\EditAction::make()
-                ->label('Edit Substation'),
+            
         ];
     }
 

@@ -26,7 +26,7 @@ class Document extends Model
     }
     
     /**
-     * Get the full URL for the document file
+     * Get the full URL for the document file with admin prefix
      */
     public function getFileUrlAttribute(): ?string
     {
@@ -34,8 +34,8 @@ class Document extends Model
             return null;
         }
         
-        // Use custom route for serving files
-        return route('storage.local', ['path' => $this->doc_file]);
+        // Use admin storage route - converts storage/url to admin/storage/url
+        return route('admin.storage', ['path' => $this->doc_file]);
     }
     
     /**

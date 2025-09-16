@@ -34,7 +34,8 @@ class CreatePermit extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('index');
+        // Redirect ke halaman index dengan filter untuk menampilkan record yang baru dibuat
+        return $this->getResource()::getUrl('index') . '?tableSearch=' . $this->record->permit_id;
     }
 
     

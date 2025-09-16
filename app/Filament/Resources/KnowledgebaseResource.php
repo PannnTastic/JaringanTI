@@ -48,7 +48,8 @@ class KnowledgebaseResource extends Resource
                 Forms\Components\RichEditor::make('kb_content')
                     ->label('Konten Pengetahuan')
                     ->required()
-                    ->fileAttachmentsDirectory('uploads') // folder di storage/app/public/uploads
+                    ->fileAttachmentsDisk('admin_uploads') // menggunakan disk admin_uploads
+                    ->fileAttachmentsDirectory('') // kosong karena root sudah di uploads
                     ->fileAttachmentsVisibility('public')
                     ->columnSpanFull(),
             ]);

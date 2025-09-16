@@ -31,53 +31,67 @@ class PermitResource extends Resource
 
     // Urutan approval yang harus diikuti
     protected static array $approvalSequence = [
+        'staff perencanaan pengadaan',
         'staff it network',
-        'asisten manajer network', 
+        'asisten manajer network',
         'infra manager'
     ];
 
     // Method untuk mendapatkan role approval berikutnya - HARDCODE
     public static function getNextApprovalRole($record): ?string
     {
-        // Cek staff it network dulu (case insensitive)
-        $staffRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff it network'])->first();
-        if ($staffRole) {
+        // Cek staff perencanaan pengadaan dulu (case insensitive)
+        $staffPerencanaanRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff perencanaan pengadaan'])->first();
+        if ($staffPerencanaanRole) {
             $staffApproval = $record->approvers()
-                ->where('approvers.role_id', $staffRole->role_id)
+                ->where('approvers.role_id', $staffPerencanaanRole->role_id)
                 ->withPivot(['approver_status'])
                 ->first();
-            
+
             if ($staffApproval && $staffApproval->pivot->approver_status == 0) {
-                return $staffRole->role_name; // Return nama role yang sebenarnya dari database
+                return $staffPerencanaanRole->role_name;
             }
         }
-        
-        // Kalau staff sudah approve, cek asisten manajer (case insensitive)
+
+        // Cek staff it network
+        $staffNetworkRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff it network'])->first();
+        if ($staffNetworkRole) {
+            $staffApproval = $record->approvers()
+                ->where('approvers.role_id', $staffNetworkRole->role_id)
+                ->withPivot(['approver_status'])
+                ->first();
+
+            if ($staffApproval && $staffApproval->pivot->approver_status == 0) {
+                return $staffNetworkRole->role_name;
+            }
+        }
+
+        // Cek asisten manajer network
         $asistenRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['asisten manajer network'])->first();
         if ($asistenRole) {
             $asistenApproval = $record->approvers()
                 ->where('approvers.role_id', $asistenRole->role_id)
                 ->withPivot(['approver_status'])
                 ->first();
-            
+
             if ($asistenApproval && $asistenApproval->pivot->approver_status == 0) {
-                return $asistenRole->role_name; // Return nama role yang sebenarnya dari database
+                return $asistenRole->role_name;
             }
         }
-        
-        // Kalau asisten sudah approve, cek infra manager (case insensitive)
+
+        // Cek infra manager
         $infraRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['infra manager'])->first();
         if ($infraRole) {
             $infraApproval = $record->approvers()
                 ->where('approvers.role_id', $infraRole->role_id)
                 ->withPivot(['approver_status'])
                 ->first();
-            
+
             if ($infraApproval && $infraApproval->pivot->approver_status == 0) {
-                return $infraRole->role_name; // Return nama role yang sebenarnya dari database
+                return $infraRole->role_name;
             }
         }
-        
+
         return null; // Semua sudah approve
     }
 
@@ -85,118 +99,106 @@ class PermitResource extends Resource
     public static function canUserApprove($record, $userRole): bool
     {
         if (!$userRole) return false;
-        
+
         $userRoleName = strtolower($userRole->role_name); // Convert ke lowercase untuk comparison
-        
-        // Jika user adalah staff it network
-        if ($userRoleName === 'staff it network') {
-            $staffRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff it network'])->first();
-            if ($staffRole) {
+
+        // Jika user adalah staff perencanaan pengadaan
+        if ($userRoleName === 'staff perencanaan pengadaan') {
+            $staffPerencanaanRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff perencanaan pengadaan'])->first();
+            if ($staffPerencanaanRole) {
                 $staffApproval = $record->approvers()
-                    ->where('approvers.role_id', $staffRole->role_id)
+                    ->where('approvers.role_id', $staffPerencanaanRole->role_id)
                     ->withPivot(['approver_status'])
                     ->first();
-                
+
                 return $staffApproval && $staffApproval->pivot->approver_status == 0;
             }
         }
-        
+
+        // Jika user adalah staff it network
+        if ($userRoleName === 'staff it network') {
+            // Cek dulu apakah staff perencanaan pengadaan sudah approve
+            $staffPerencanaanRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff perencanaan pengadaan'])->first();
+            if ($staffPerencanaanRole) {
+                $staffPerencanaanApproval = $record->approvers()
+                    ->where('approvers.role_id', $staffPerencanaanRole->role_id)
+                    ->withPivot(['approver_status'])
+                    ->first();
+
+                // Jika staff perencanaan belum approve, staff it tidak bisa approve
+                if ($staffPerencanaanApproval && $staffPerencanaanApproval->pivot->approver_status == 0) {
+                    return false;
+                }
+            }
+            $staffNetworkRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff it network'])->first();
+            if ($staffNetworkRole) {
+                $staffNetworkApproval = $record->approvers()
+                    ->where('approvers.role_id', $staffNetworkRole->role_id)
+                    ->withPivot(['approver_status'])
+                    ->first();
+
+                return $staffNetworkApproval && $staffNetworkApproval->pivot->approver_status == 0;
+            }
+        }
+
         // Jika user adalah asisten manajer network
         if ($userRoleName === 'asisten manajer network') {
-            // Cek dulu apakah asisten ada di approver list
-            $asistenRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['asisten manajer network'])->first();
-            if (!$asistenRole) {
-                return false;
-            }
-            
-            $asistenApproval = $record->approvers()
-                ->where('approvers.role_id', $asistenRole->role_id)
-                ->withPivot(['approver_status'])
-                ->first();
-            
-            // Jika asisten tidak ada di approver list, tidak bisa approve
-            if (!$asistenApproval) {
-                return false;
-            }
-            
-            // Jika asisten sudah approve, tidak bisa approve lagi
-            if ($asistenApproval->pivot->approver_status == 1) {
-                return false;
-            }
-            
-            // Cek apakah staff sudah approve (jika ada staff di approver list)
-            $staffRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff it network'])->first();
-            if ($staffRole) {
-                $staffApproval = $record->approvers()
-                    ->where('approvers.role_id', $staffRole->role_id)
-                    ->withPivot(['approver_status'])
-                    ->first();
-                
-                // Jika ada staff di approver list dan belum approve, asisten tidak bisa approve
-                if ($staffApproval && $staffApproval->pivot->approver_status == 0) {
-                    return false;
+            // Cek dulu apakah staff perencanaan dan staff it sudah approve
+            $prevRoles = ['staff perencanaan pengadaan', 'staff it network'];
+            foreach ($prevRoles as $roleName) {
+                $prevRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', [$roleName])->first();
+                if ($prevRole) {
+                    $prevApproval = $record->approvers()
+                        ->where('approvers.role_id', $prevRole->role_id)
+                        ->withPivot(['approver_status'])
+                        ->first();
+
+                    if ($prevApproval && $prevApproval->pivot->approver_status == 0) {
+                        return false;
+                    }
                 }
             }
-            
-            // Jika sampai sini, asisten bisa approve
-            return true;
-        }
-        
-        // Jika user adalah infra manager
-        if ($userRoleName === 'infra manager') {
-            // Cek dulu apakah infra ada di approver list
-            $infraRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['infra manager'])->first();
-            if (!$infraRole) {
-                return false;
-            }
-            
-            $infraApproval = $record->approvers()
-                ->where('approvers.role_id', $infraRole->role_id)
-                ->withPivot(['approver_status'])
-                ->first();
-            
-            // Jika infra tidak ada di approver list, tidak bisa approve
-            if (!$infraApproval) {
-                return false;
-            }
-            
-            // Jika infra sudah approve, tidak bisa approve lagi
-            if ($infraApproval->pivot->approver_status == 1) {
-                return false;
-            }
-            
-            // Cek apakah staff dan asisten sudah approve (jika ada di approver list)
-            $staffRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['staff it network'])->first();
+
             $asistenRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['asisten manajer network'])->first();
-            
-            if ($staffRole) {
-                $staffApproval = $record->approvers()
-                    ->where('approvers.role_id', $staffRole->role_id)
-                    ->withPivot(['approver_status'])
-                    ->first();
-                
-                // Jika ada staff di approver list dan belum approve, infra tidak bisa approve
-                if ($staffApproval && $staffApproval->pivot->approver_status == 0) {
-                    return false;
-                }
-            }
-            
             if ($asistenRole) {
                 $asistenApproval = $record->approvers()
                     ->where('approvers.role_id', $asistenRole->role_id)
                     ->withPivot(['approver_status'])
                     ->first();
-                
-                // Jika ada asisten di approver list dan belum approve, infra tidak bisa approve
-                if ($asistenApproval && $asistenApproval->pivot->approver_status == 0) {
-                    return false;
+
+                return $asistenApproval && $asistenApproval->pivot->approver_status == 0;
+            }
+        }
+
+        // Jika user adalah infra manager
+        if ($userRoleName === 'infra manager') {
+            // Cek dulu apakah semua role sebelumnya sudah approve
+            $prevRoles = ['staff perencanaan pengadaan', 'staff it network', 'asisten manajer network'];
+            foreach ($prevRoles as $roleName) {
+                $prevRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', [$roleName])->first();
+                if ($prevRole) {
+                    $prevApproval = $record->approvers()
+                        ->where('approvers.role_id', $prevRole->role_id)
+                        ->withPivot(['approver_status'])
+                        ->first();
+
+                    if ($prevApproval && $prevApproval->pivot->approver_status == 0) {
+                        return false;
+                    }
                 }
             }
-            
-            // Jika sampai sini, infra bisa approve
-            return true;
+
+            $infraRole = \App\Models\Role::whereRaw('LOWER(role_name) = ?', ['infra manager'])->first();
+            if ($infraRole) {
+                $infraApproval = $record->approvers()
+                    ->where('approvers.role_id', $infraRole->role_id)
+                    ->withPivot(['approver_status'])
+                    ->first();
+
+                return $infraApproval && $infraApproval->pivot->approver_status == 0;
+            }
         }
-        
+
         return false;
     }
 
@@ -224,7 +226,7 @@ class PermitResource extends Resource
     {
         try {
             DB::beginTransaction();
-            
+
             // Reset semua approval status kembali ke 0
             $record->approvers()->updateExistingPivot(
                 $record->approvers->pluck('role_id')->toArray(),
@@ -234,17 +236,16 @@ class PermitResource extends Resource
                     'rejection_reason' => null
                 ]
             );
-            
+
             // Reset permit status
             $record->update([
                 'permit_status' => 0,
                 'rejected_by' => null,
                 'rejected_at' => null
             ]);
-            
+
             DB::commit();
             return true;
-            
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Failed to reset approvals', [
@@ -260,10 +261,10 @@ class PermitResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Hidden::make('user_id')
-                    ->default(function() {
+                    ->default(function () {
                         return Auth::id();
                     }),
-                    
+
                 Forms\Components\Select::make('substation_id')
                     ->label('Substation')
                     ->required()
@@ -274,12 +275,12 @@ class PermitResource extends Resource
                     ->default(false)
                     ->disabled()
                     ->helperText('Status akan diubah setelah semua role menyetujui'),
-                    
+
                 Forms\Components\Select::make('approver_roles')
                     ->label('Role Approver')
                     ->multiple()
-                    ->options(Role::whereIn('role_name', ['Staff IT Network', 'Asisten Manajer Network','Infra Manager'])
-                    ->pluck('role_name', 'role_id'))
+                    ->options(Role::whereIn('role_name', ['Staff Perencanaan Pengadaan', 'Staff IT Network', 'Asisten Manajer Network', 'Infra Manager'])
+                        ->pluck('role_name', 'role_id'))
                     ->required()
                     ->helperText('Pilih role yang harus menyetujui permit ini')
                     ->dehydrated(false) // Mencegah field ini disimpan langsung ke database
@@ -290,21 +291,25 @@ class PermitResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('permit_id')
+                    ->label('ID Permit')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('users.name')
                     ->label('Nama Pemohon')
-                    ->getStateUsing(fn (?Permit $record) => $record?->users?->name ?? ''),
+                    ->getStateUsing(fn(?Permit $record) => $record?->users?->name ?? ''),
                 Tables\Columns\TextColumn::make('substations.substation_name')
                     ->label('Nama Substation')
-                    ->getStateUsing(fn (?Permit $record) => $record?->substations?->substation_name ?? ''),
+                    ->getStateUsing(fn(?Permit $record) => $record?->substations?->substation_name ?? ''),
                 Tables\Columns\IconColumn::make('permit_status')
                     ->label('Status Permit')
                     ->getStateUsing(function (?Permit $record) {
                         if (!$record) return 'pending';
-                        
+
                         $status = $record->getAttribute('permit_status');
-                        return match($status) {
+                        return match ($status) {
                             1 => 'approved',
-                            -1 => 'rejected', 
+                            -1 => 'rejected',
                             default => 'pending'
                         };
                     })
@@ -315,14 +320,14 @@ class PermitResource extends Resource
                     ])
                     ->colors([
                         'warning' => 'pending',
-                        'success' => 'approved', 
+                        'success' => 'approved',
                         'danger' => 'rejected',
                     ])
                     ->tooltip(function (?Permit $record) {
                         if (!$record) return null;
-                        
+
                         $status = $record->getAttribute('permit_status');
-                        return match($status) {
+                        return match ($status) {
                             1 => 'Permit Disetujui',
                             -1 => 'Permit Ditolak' . ($record->getAttribute('rejected_by') ? ' oleh ' . $record->getAttribute('rejected_by') : ''),
                             default => 'Menunggu Persetujuan'
@@ -332,27 +337,27 @@ class PermitResource extends Resource
                     ->label('Status Approval')
                     ->getStateUsing(function (?Permit $record) {
                         if (!$record) return 'N/A';
-                        
+
                         $approvers = $record->approvers()
                             ->withPivot(['approver_status', 'approved_at'])
                             ->get();
-                        
+
                         $approved = $approvers->where('pivot.approver_status', 1)->count();
                         $total = $approvers->count();
-                        
+
                         return "{$approved}/{$total} Approved";
                     })
                     ->badge()
                     ->color(function (?Permit $record) {
                         if (!$record) return 'gray';
-                        
+
                         $approvers = $record->approvers()
                             ->withPivot(['approver_status'])
                             ->get();
-                        
+
                         $approved = $approvers->where('pivot.approver_status', 1)->count();
                         $total = $approvers->count();
-                        
+
                         if ($approved == $total) {
                             return 'success';
                         } elseif ($approved > 0) {
@@ -365,31 +370,31 @@ class PermitResource extends Resource
                     ->label('Menunggu Approval')
                     ->getStateUsing(function (?Permit $record) {
                         if (!$record) return 'N/A';
-                        
+
                         $status = $record->getAttribute('permit_status');
-                        
+
                         if ($status == 1) {
                             return 'Disetujui';
                         } elseif ($status == -1) {
                             $rejectedBy = $record->getAttribute('rejected_by');
                             return 'Ditolak' . ($rejectedBy ? ' oleh ' . $rejectedBy : '');
                         }
-                        
+
                         $nextRole = self::getNextApprovalRole($record);
                         return $nextRole ? ucwords(str_replace('_', ' ', $nextRole)) : 'Semua Selesai';
                     })
                     ->badge()
                     ->color(function (?Permit $record) {
                         if (!$record) return 'gray';
-                        
+
                         $status = $record->getAttribute('permit_status');
-                        
+
                         if ($status == 1) {
                             return 'success';
                         } elseif ($status == -1) {
                             return 'danger';
                         }
-                        
+
                         $nextRole = self::getNextApprovalRole($record);
                         return $nextRole ? 'warning' : 'success';
                     }),
@@ -397,38 +402,38 @@ class PermitResource extends Resource
                     ->label('Status Approval Saya')
                     ->getStateUsing(function (?Permit $record) {
                         if (!$record) return 'N/A';
-                        
+
                         $user = Auth::user();
                         $userRole = $user->role ?? null;
-                        
+
                         // Jika user adalah admin
                         if ($userRole && strtolower($userRole->role_name) === 'administrator') {
                             return 'Admin (View Only)';
                         }
-                        
+
                         // Jika user adalah pembuat permit
                         if ($record->getAttribute('user_id') == Auth::id()) {
                             $status = $record->getAttribute('permit_status');
-                            return match($status) {
+                            return match ($status) {
                                 1 => 'Permit Disetujui',
                                 -1 => 'Permit Ditolak',
                                 default => 'Menunggu Approval'
                             };
                         }
-                        
+
                         if (!$userRole) {
                             return 'N/A';
                         }
-                        
+
                         $approval = $record->approvers()
                             ->where('approvers.role_id', $userRole->role_id)
                             ->withPivot(['approver_status', 'approved_at', 'rejection_reason'])
                             ->first();
-                        
+
                         if (!$approval) {
                             return 'Tidak Relevan';
                         }
-                        
+
                         if ($approval->pivot->approver_status == 1) {
                             $approvedAt = $approval->pivot->approved_at;
                             $formattedDate = $approvedAt ? \Carbon\Carbon::parse($approvedAt)->format('d/m/Y H:i') : '';
@@ -443,7 +448,7 @@ class PermitResource extends Resource
                             if ($permitStatus == -1) {
                                 return 'Permit Ditolak';
                             }
-                            
+
                             // Cek apakah giliran user untuk approve
                             $canApprove = self::canUserApprove($record, $userRole);
                             return $canApprove ? 'Giliran Saya' : 'Menunggu Urutan';
@@ -452,39 +457,39 @@ class PermitResource extends Resource
                     ->badge()
                     ->color(function (?Permit $record) {
                         if (!$record) return 'gray';
-                        
+
                         $user = Auth::user();
                         $roleId = $user->role_id ?? null;
                         $userRole = $roleId ? DB::table('roles')->where('role_id', $roleId)->first() : null;
-                        
+
                         // Jika user adalah admin
                         if ($userRole && strtolower($userRole->role_name) === 'administrator') {
                             return 'primary';
                         }
-                        
+
                         // Jika user adalah pembuat permit
                         if ($record->getAttribute('user_id') == Auth::id()) {
                             $status = $record->getAttribute('permit_status');
-                            return match($status) {
+                            return match ($status) {
                                 1 => 'success',
                                 -1 => 'danger',
                                 default => 'warning'
                             };
                         }
-                        
+
                         if (!$userRole) {
                             return 'gray';
                         }
-                        
+
                         $approval = $record->approvers()
                             ->where('approvers.role_id', $userRole->role_id)
                             ->withPivot(['approver_status'])
                             ->first();
-                        
+
                         if (!$approval) {
                             return 'gray';
                         }
-                        
+
                         if ($approval->pivot->approver_status == 1) {
                             return 'success';
                         } elseif ($approval->pivot->approver_status == -1) {
@@ -495,7 +500,7 @@ class PermitResource extends Resource
                             if ($permitStatus == -1) {
                                 return 'gray';
                             }
-                            
+
                             // Cek apakah giliran user untuk approve
                             $canApprove = self::canUserApprove($record, $userRole);
                             return $canApprove ? 'warning' : 'gray';
@@ -503,38 +508,38 @@ class PermitResource extends Resource
                     })
                     ->tooltip(function (?Permit $record) {
                         if (!$record) return null;
-                        
+
                         $user = Auth::user();
                         $userRole = $user->role ?? null;
-                        
+
                         if (!$userRole || $record->getAttribute('user_id') == Auth::id()) {
                             return null;
                         }
-                        
+
                         $approval = $record->approvers()
                             ->where('approvers.role_id', $userRole->role_id)
                             ->withPivot(['rejection_reason'])
                             ->first();
-                        
+
                         if ($approval && $approval->pivot->approver_status == -1 && $approval->pivot->rejection_reason) {
                             return 'Alasan: ' . $approval->pivot->rejection_reason;
                         }
-                        
+
                         return null;
                     }),
                 Tables\Columns\TextColumn::make('approvers')
                     ->label('Required Approvers')
-                    ->getStateUsing(fn (?Permit $record) => $record?->approvers?->pluck('role_name')->implode(', ') ?? ''),
+                    ->getStateUsing(fn(?Permit $record) => $record?->approvers?->pluck('role_name')->implode(', ') ?? ''),
                 Tables\Columns\TextColumn::make('rejection_details')
                     ->label('Detail Penolakan')
                     ->getStateUsing(function (?Permit $record) {
                         if (!$record || $record->getAttribute('permit_status') != -1) {
                             return null;
                         }
-                        
+
                         $rejectedBy = $record->getAttribute('rejected_by');
                         $rejectedAt = $record->getAttribute('rejected_at');
-                        
+
                         $details = '';
                         if ($rejectedBy) {
                             $details .= 'Ditolak oleh: ' . $rejectedBy;
@@ -543,21 +548,21 @@ class PermitResource extends Resource
                             $formattedDate = \Carbon\Carbon::parse($rejectedAt)->format('d/m/Y H:i');
                             $details .= ($details ? ' (' . $formattedDate . ')' : $formattedDate);
                         }
-                        
+
                         // Cari alasan penolakan dari approvers pivot
                         $rejectionReason = $record->approvers()
                             ->wherePivot('approver_status', -1)
                             ->withPivot(['rejection_reason'])
                             ->first()?->pivot?->rejection_reason;
-                        
+
                         if ($rejectionReason) {
                             $details .= "\nAlasan: " . $rejectionReason;
                         }
-                        
+
                         return $details ?: null;
                     })
                     ->wrap()
-                    ->visible(fn (?Permit $record) => $record?->getAttribute('permit_status') == -1)
+                    ->visible(fn(?Permit $record) => $record?->getAttribute('permit_status') == -1)
                     ->color('danger'),
                 Tables\Columns\TextColumn::make('substation_documents')
                     ->label('Dokumen Substation')
@@ -565,13 +570,13 @@ class PermitResource extends Resource
                         if (!$record || !$record->substations) {
                             return 'Tidak ada substation';
                         }
-                        
+
                         $documents = $record->substations->documents;
-                        
+
                         if ($documents->isEmpty()) {
                             return 'Belum ada dokumen';
                         }
-                        
+
                         return $documents->count() . ' dokumen tersedia';
                     })
                     ->badge()
@@ -579,9 +584,9 @@ class PermitResource extends Resource
                         if (!$record || !$record->substations) {
                             return 'gray';
                         }
-                        
+
                         $documentCount = $record->substations->documents->count();
-                        
+
                         if ($documentCount == 0) {
                             return 'danger';
                         } elseif ($documentCount < 3) {
@@ -594,19 +599,19 @@ class PermitResource extends Resource
                         if (!$record || !$record->substations || $record->substations->documents->isEmpty()) {
                             return 'Klik action "Lihat Dokumen" untuk melihat detail dokumen';
                         }
-                        
+
                         $documents = $record->substations->documents->take(5); // Show max 5 documents in tooltip
                         $docNames = $documents->pluck('doc_name')->implode("\n• ");
                         $moreCount = $record->substations->documents->count() - 5;
-                        
+
                         $tooltip = "Dokumen tersedia:\n• " . $docNames;
-                        
+
                         if ($moreCount > 0) {
                             $tooltip .= "\n... dan " . $moreCount . " dokumen lainnya";
                         }
-                        
+
                         $tooltip .= "\n\nKlik action 'Lihat Dokumen' untuk detail lengkap";
-                        
+
                         return $tooltip;
                     })
                     ->searchable(false)
@@ -649,23 +654,23 @@ class PermitResource extends Resource
                     ->default('all')
                     ->query(function (Builder $query, array $data): Builder {
                         $userRole = Auth::user()->role;
-                        
+
                         if (!$userRole || !isset($data['value'])) {
                             return $query;
                         }
-                        
-                        return match($data['value']) {
+
+                        return match ($data['value']) {
                             'pending' => $query->whereHas('approvers', function ($q) use ($userRole) {
                                 $q->where('approvers.role_id', $userRole->role_id)
-                                  ->where('approvers.approver_status', 0);
+                                    ->where('approvers.approver_status', 0);
                             })->where('permit_status', 0), // Hanya yang belum ditolak
                             'approved' => $query->whereHas('approvers', function ($q) use ($userRole) {
                                 $q->where('approvers.role_id', $userRole->role_id)
-                                  ->where('approvers.approver_status', 1);
+                                    ->where('approvers.approver_status', 1);
                             }),
                             'rejected' => $query->whereHas('approvers', function ($q) use ($userRole) {
                                 $q->where('approvers.role_id', $userRole->role_id)
-                                  ->where('approvers.approver_status', -1);
+                                    ->where('approvers.approver_status', -1);
                             }),
                             default => $query
                         };
@@ -680,40 +685,53 @@ class PermitResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         $user = Auth::user();
                         $userRole = $user->role;
-                        
+
                         if (!$userRole || !isset($data['value']) || strtolower($userRole->role_name) === 'administrator') {
                             return $query;
                         }
-                        
-                        return match($data['value']) {
+
+                        return match ($data['value']) {
                             'my_turn' => $query->where(function ($mainQuery) use ($userRole) {
                                 $mainQuery->whereHas('approvers', function ($q) use ($userRole) {
                                     $q->where('approvers.role_id', $userRole->role_id)
-                                      ->where('approvers.approver_status', 0);
+                                        ->where('approvers.approver_status', 0);
                                 });
-                                
-                                
-                                $userRoleName = $userRole->role_name;
-                                if ($userRoleName === 'Staff IT Network') {
-                                    // Staff selalu bisa approve jika belum approve
+
+                                $userRoleName = strtolower($userRole->role_name);
+                                if ($userRoleName === 'staff perencanaan pengadaan') {
+                                    // Staff perencanaan selalu bisa approve jika belum approve
                                     return;
-                                } elseif ($userRoleName === 'Asisten Manajer Network') {
-                                    // Asisten hanya bisa jika staff sudah approve atau tidak ada staff
+                                } elseif ($userRoleName === 'staff it network') {
+                                    // Staff IT hanya bisa jika staff perencanaan sudah approve
                                     $mainQuery->whereNotExists(function ($staffQuery) {
                                         $staffQuery->select('*')
                                             ->from('approvers')
                                             ->join('roles', 'approvers.role_id', '=', 'roles.role_id')
-                                            ->where('roles.role_name', 'Staff IT Network')
+                                            ->whereRaw('LOWER(roles.role_name) = ?', ['staff perencanaan pengadaan'])
                                             ->whereColumn('approvers.permit_id', 'permits.permit_id')
                                             ->where('approvers.approver_status', 0);
                                     });
-                                } elseif ($userRoleName === 'Infra Manager') {
-                                    // Infra manager hanya bisa jika staff dan asisten sudah approve
+                                } elseif ($userRoleName === 'asisten manajer network') {
+                                    // Asisten hanya bisa jika staff perencanaan dan staff it sudah approve
                                     $mainQuery->whereNotExists(function ($prevQuery) {
                                         $prevQuery->select('*')
                                             ->from('approvers')
                                             ->join('roles', 'approvers.role_id', '=', 'roles.role_id')
-                                            ->whereIn('roles.role_name', ['Staff IT Network', 'Asisten Manajer Network'])
+                                            ->whereRaw('LOWER(roles.role_name) IN (?, ?)', ['staff perencanaan pengadaan', 'staff it network'])
+                                            ->whereColumn('approvers.permit_id', 'permits.permit_id')
+                                            ->where('approvers.approver_status', 0);
+                                    });
+                                } elseif ($userRoleName === 'infra manager') {
+                                    // Infra manager hanya bisa jika semua sebelumnya sudah approve
+                                    $mainQuery->whereNotExists(function ($prevQuery) {
+                                        $prevQuery->select('*')
+                                            ->from('approvers')
+                                            ->join('roles', 'approvers.role_id', '=', 'roles.role_id')
+                                            ->whereRaw('LOWER(roles.role_name) IN (?, ?, ?)', [
+                                                'staff perencanaan pengadaan',
+                                                'staff it network',
+                                                'asisten manajer network'
+                                            ])
                                             ->whereColumn('approvers.permit_id', 'permits.permit_id')
                                             ->where('approvers.approver_status', 0);
                                     });
@@ -722,37 +740,52 @@ class PermitResource extends Resource
                             'waiting' => $query->where(function ($mainQuery) use ($userRole) {
                                 $mainQuery->whereHas('approvers', function ($q) use ($userRole) {
                                     $q->where('approvers.role_id', $userRole->role_id)
-                                      ->where('approvers.approver_status', 0);
+                                        ->where('approvers.approver_status', 0);
                                 });
-                                
-                                // HARDCODE: Ada role sebelumnya yang belum approve
-                                $userRoleName = $userRole->role_name;
-                                if ($userRoleName === 'Asisten Manajer Network') {
+
+                                $userRoleName = strtolower($userRole->role_name);
+                                if ($userRoleName === 'staff perencanaan pengadaan') {
+                                    // Staff perencanaan tidak pernah menunggu
+                                    $mainQuery->whereRaw('1 = 0');
+                                } elseif ($userRoleName === 'staff it network') {
+                                    // Staff IT menunggu staff perencanaan
                                     $mainQuery->whereExists(function ($staffQuery) {
                                         $staffQuery->select('*')
                                             ->from('approvers')
                                             ->join('roles', 'approvers.role_id', '=', 'roles.role_id')
-                                            ->where('roles.role_name', 'Staff IT Network')
+                                            ->whereRaw('LOWER(roles.role_name) = ?', ['staff perencanaan pengadaan'])
                                             ->whereColumn('approvers.permit_id', 'permits.permit_id')
                                             ->where('approvers.approver_status', 0);
                                     });
-                                } elseif ($userRoleName === 'Infra Manager') {
+                                } elseif ($userRoleName === 'asisten manajer network') {
+                                    // Asisten menunggu staff perencanaan atau staff it
                                     $mainQuery->whereExists(function ($prevQuery) {
                                         $prevQuery->select('*')
                                             ->from('approvers')
                                             ->join('roles', 'approvers.role_id', '=', 'roles.role_id')
-                                            ->whereIn('roles.role_name', ['Staff IT Network', 'Asisten Manajer Network'])
+                                            ->whereRaw('LOWER(roles.role_name) IN (?, ?)', ['staff perencanaan pengadaan', 'staff it network'])
                                             ->whereColumn('approvers.permit_id', 'permits.permit_id')
                                             ->where('approvers.approver_status', 0);
                                     });
-                                } else {
-                                    // Staff tidak pernah menunggu urutan
-                                    $mainQuery->whereRaw('1 = 0'); // False condition
+                                } elseif ($userRoleName === 'infra manager') {
+                                    // Infra manager menunggu semua sebelumnya
+                                    $mainQuery->whereExists(function ($prevQuery) {
+                                        $prevQuery->select('*')
+                                            ->from('approvers')
+                                            ->join('roles', 'approvers.role_id', '=', 'roles.role_id')
+                                            ->whereRaw('LOWER(roles.role_name) IN (?, ?, ?)', [
+                                                'staff perencanaan pengadaan',
+                                                'staff it network',
+                                                'asisten manajer network'
+                                            ])
+                                            ->whereColumn('approvers.permit_id', 'permits.permit_id')
+                                            ->where('approvers.approver_status', 0);
+                                    });
                                 }
                             }),
                             'completed' => $query->whereHas('approvers', function ($q) use ($userRole) {
                                 $q->where('approvers.role_id', $userRole->role_id)
-                                  ->where('approvers.approver_status', 1);
+                                    ->where('approvers.approver_status', 1);
                             }),
                             default => $query
                         };
@@ -769,18 +802,18 @@ class PermitResource extends Resource
                         if (!isset($data['value']) || $data['value'] === '') {
                             return $query;
                         }
-                        
-                        return match($data['value']) {
+
+                        return match ($data['value']) {
                             'has_documents' => $query->whereHas('substations.documents'),
                             'no_documents' => $query->whereDoesntHave('substations.documents'),
                             'few_documents' => $query->whereHas('substations', function ($q) {
                                 $q->withCount('documents')
-                                  ->having('documents_count', '<', 3)
-                                  ->having('documents_count', '>', 0);
+                                    ->having('documents_count', '<', 3)
+                                    ->having('documents_count', '>', 0);
                             }),
                             'many_documents' => $query->whereHas('substations', function ($q) {
                                 $q->withCount('documents')
-                                  ->having('documents_count', '>=', 3);
+                                    ->having('documents_count', '>=', 3);
                             }),
                             default => $query
                         };
@@ -792,8 +825,8 @@ class PermitResource extends Resource
                     ->label('Lihat Dokumen')
                     ->icon('heroicon-o-document-text')
                     ->color('info')
-                    ->visible(fn (?Permit $record) => $record?->substations?->documents?->count() > 0)
-                    ->url(fn (?Permit $record) => $record?->substations ? 
+                    ->visible(fn(?Permit $record) => $record?->substations?->documents?->count() > 0)
+                    ->url(fn(?Permit $record) => $record?->substations ?
                         \App\Filament\Resources\SubstationResource::getUrl('view_documents', [
                             'record' => $record->substations,
                             'from' => 'permit'
@@ -803,12 +836,12 @@ class PermitResource extends Resource
                     ->label('Approve')
                     ->action(function (?Permit $record) {
                         if (!$record) return;
-                        
+
                         $userRole = Auth::user()->role;
-                        
+
                         if ($userRole && self::canUserApprove($record, $userRole)) {
                             DB::beginTransaction();
-                            
+
                             try {
                                 // Update pivot record untuk role yang user miliki
                                 $record->approvers()
@@ -816,27 +849,27 @@ class PermitResource extends Resource
                                         'approver_status' => 1,
                                         'approved_at' => now()
                                     ]);
-                                
+
                                 // Cek apakah semua approver sudah menyetujui
                                 $totalApprovers = $record->approvers()->count();
                                 $approvedCount = $record->approvers()
                                     ->where('approvers.approver_status', 1)
                                     ->count();
-                                
+
                                 // Jika semua sudah approve, update permit status
                                 if ($approvedCount == $totalApprovers) {
                                     $record->update(['permit_status' => 1]);
-                                    
+
                                     // Kirim notifikasi ke pembuat permit
                                     PermitNotificationService::notifyPermitCreator($record, 'approved');
-                                    
+
                                     Log::info('Permit fully approved', [
                                         'permit_id' => $record->permit_id,
                                         'final_approver' => $userRole->role_name,
                                         'approved_by_user' => Auth::user()->name,
                                         'approved_at' => now()
                                     ]);
-                                    
+
                                     \Filament\Notifications\Notification::make()
                                         ->title('Permit Disetujui Sepenuhnya')
                                         ->body('Permit telah disetujui oleh semua approver dan siap diproses.')
@@ -845,7 +878,7 @@ class PermitResource extends Resource
                                 } else {
                                     // Kirim notifikasi ke approver berikutnya
                                     PermitNotificationService::notifyNextApprover($record);
-                                    
+
                                     Log::info('Permit partially approved', [
                                         'permit_id' => $record->permit_id,
                                         'approver' => $userRole->role_name,
@@ -853,25 +886,24 @@ class PermitResource extends Resource
                                         'progress' => "$approvedCount/$totalApprovers",
                                         'approved_at' => now()
                                     ]);
-                                    
+
                                     \Filament\Notifications\Notification::make()
                                         ->title('Approval Berhasil')
                                         ->body("Permit telah Anda setujui. Progress: $approvedCount/$totalApprovers approver.")
                                         ->success()
                                         ->send();
                                 }
-                                
+
                                 DB::commit();
-                                
                             } catch (\Exception $e) {
                                 DB::rollback();
-                                
+
                                 Log::error('Failed to approve permit', [
                                     'permit_id' => $record->permit_id,
                                     'user' => Auth::user()->name,
                                     'error' => $e->getMessage()
                                 ]);
-                                
+
                                 \Filament\Notifications\Notification::make()
                                     ->title('Gagal Menyetujui Permit')
                                     ->body('Terjadi kesalahan saat menyetujui permit. Silakan coba lagi.')
@@ -891,19 +923,19 @@ class PermitResource extends Resource
                     ->color('success')
                     ->visible(function (?Permit $record) {
                         if (!$record) return false;
-                        
+
                         $userRole = Auth::user()->role;
-                        
+
                         if (!$userRole) {
                             return false;
                         }
-                        
+
                         // Cek apakah user memiliki role yang ada di approvers list
                         $hasApprovalRole = $record->approvers()
                             ->where('approvers.role_id', $userRole->role_id)
                             ->where('approvers.approver_status', 0)
                             ->exists();
-                        
+
                         // Dan cek apakah sesuai urutan approval
                         return $hasApprovalRole && self::canUserApprove($record, $userRole);
                     }),
@@ -912,12 +944,12 @@ class PermitResource extends Resource
                     ->label('Tolak')
                     ->action(function (?Permit $record, array $data) {
                         if (!$record) return;
-                        
+
                         $userRole = Auth::user()->role;
-                        
+
                         if ($userRole && self::canUserApprove($record, $userRole)) {
                             DB::beginTransaction();
-                            
+
                             try {
                                 // Update pivot record untuk role yang user miliki dengan status rejection (-1)
                                 $record->approvers()
@@ -926,19 +958,19 @@ class PermitResource extends Resource
                                         'approved_at' => now(),
                                         'rejection_reason' => $data['rejection_reason'] ?? null
                                     ]);
-                                
+
                                 // Update permit status menjadi rejected
                                 $record->update([
                                     'permit_status' => -1, // -1 untuk rejected
                                     'rejected_by' => $userRole->role_name,
                                     'rejected_at' => now()
                                 ]);
-                                
+
                                 DB::commit();
-                                
+
                                 // Kirim notifikasi ke pembuat permit dengan alasan penolakan
                                 PermitNotificationService::notifyPermitCreator($record, 'rejected', $data['rejection_reason'] ?? null);
-                                
+
                                 // Log activity
                                 Log::info('Permit rejected', [
                                     'permit_id' => $record->permit_id,
@@ -947,24 +979,23 @@ class PermitResource extends Resource
                                     'rejection_reason' => $data['rejection_reason'] ?? 'No reason provided',
                                     'rejected_at' => now()
                                 ]);
-                                
+
                                 // Notifikasi success
                                 \Filament\Notifications\Notification::make()
                                     ->title('Permit Berhasil Ditolak')
                                     ->body('Permit telah ditolak dan tidak dapat diproses lebih lanjut.')
                                     ->success()
                                     ->send();
-                                    
                             } catch (\Exception $e) {
                                 DB::rollback();
-                                
+
                                 // Log error
                                 Log::error('Failed to reject permit', [
                                     'permit_id' => $record->permit_id,
                                     'user' => Auth::user()->name,
                                     'error' => $e->getMessage()
                                 ]);
-                                
+
                                 // Notifikasi error
                                 \Filament\Notifications\Notification::make()
                                     ->title('Gagal Menolak Permit')
@@ -996,24 +1027,24 @@ class PermitResource extends Resource
                     ->icon('heroicon-o-x-circle')
                     ->visible(function (?Permit $record) {
                         if (!$record) return false;
-                        
+
                         $userRole = Auth::user()->role;
-                        
+
                         if (!$userRole) {
                             return false;
                         }
-                        
+
                         // Hanya tampil jika permit belum disetujui dan belum ditolak
                         if ($record->getAttribute('permit_status') != 0) {
                             return false;
                         }
-                        
+
                         // Cek apakah user memiliki role yang ada di approvers list
                         $hasApprovalRole = $record->approvers()
                             ->where('approvers.role_id', $userRole->role_id)
                             ->where('approvers.approver_status', 0)
                             ->exists();
-                        
+
                         // Dan cek apakah sesuai urutan approval
                         return $hasApprovalRole && self::canUserApprove($record, $userRole);
                     }),
@@ -1022,11 +1053,11 @@ class PermitResource extends Resource
                     ->label('Reset Approval')
                     ->action(function (?Permit $record) {
                         if (!$record) return;
-                        
+
                         if (self::resetApprovals($record)) {
                             // Kirim notifikasi ke semua approver
                             PermitNotificationService::notifyApproversOnReset($record);
-                            
+
                             \Filament\Notifications\Notification::make()
                                 ->title('Reset Berhasil')
                                 ->body('Semua approval telah direset. Permit dapat diproses ulang dari awal.')
@@ -1048,14 +1079,14 @@ class PermitResource extends Resource
                     ->icon('heroicon-o-arrow-path')
                     ->visible(function (?Permit $record) {
                         if (!$record) return false;
-                        
+
                         $userRole = Auth::user()->role;
-                        
+
                         // Hanya admin yang bisa reset
                         if (!$userRole || strtolower($userRole->role_name) !== 'administrator') {
                             return false;
                         }
-                        
+
                         // Hanya tampil jika permit sudah pernah diproses (approved/rejected)
                         return $record->getAttribute('permit_status') != 0;
                     })
@@ -1096,36 +1127,36 @@ class PermitResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $user = Auth::user();
-        
+
         if (!$user) {
             return parent::getEloquentQuery()->where('permit_id', 0); // Return empty result if no user
         }
-        
+
         // Ambil ID user - gunakan attribute yang tersedia
         $userId = $user->id ?? $user->user_id ?? null;
-        
+
         if (!$userId) {
             return parent::getEloquentQuery()->where('permit_id', 0);
         }
-        
+
         // Cek apakah user memiliki role Administrator
         $userRole = DB::table('users')
             ->join('roles', 'users.role_id', '=', 'roles.role_id')
             ->where('users.user_id', $userId)
             ->select('roles.role_name', 'roles.role_id')
             ->first();
-        
+
         // Administrator bisa melihat SEMUA permit tanpa batasan apapun
         if ($userRole && strtolower($userRole->role_name) === 'administrator') {
             return parent::getEloquentQuery(); // Tampilkan semua permit
         }
-        
+
         // Untuk user selain Administrator, filter berdasarkan permission
         return parent::getEloquentQuery()
             ->where(function ($query) use ($userId, $userRole) {
                 // Tampilkan permit yang dibuat oleh user sendiri
                 $query->where('user_id', $userId);
-                
+
                 // ATAU permit dimana user adalah approver (berdasarkan role)
                 if ($userRole) {
                     $query->orWhereHas('approvers', function ($subQuery) use ($userRole) {
@@ -1134,5 +1165,4 @@ class PermitResource extends Resource
                 }
             });
     }
-
 }

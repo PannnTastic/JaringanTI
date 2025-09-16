@@ -84,7 +84,7 @@ class ContentResource extends Resource
                     ->disk('public')
                     ->height(50)
                     ->width(50)
-                    
+                     // Menggunakan accessor dari model
                     ->checkFileExistence(false)
                     ->defaultImageUrl(url('/img/placeholder.png')),
                 Tables\Columns\TextColumn::make('created_at')

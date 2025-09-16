@@ -116,8 +116,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('profile');
 });
 
-// Route untuk serving file storage ketika web server tidak bisa akses langsung
-Route::get('/storage/{path}', function ($path) {
+// Route untuk serving file storage ketika web server tidak bisa akses langsung dengan admin prefix
+Route::get('admin/storage/{path}', function ($path) {
     $filePath = storage_path('app/public/' . $path);
     
     if (!file_exists($filePath)) {
@@ -128,6 +128,6 @@ Route::get('/storage/{path}', function ($path) {
     return response()->file($filePath, [
         'Content-Type' => $mimeType,
     ]);
-})->where('path', '.*')->name('storage.local');
+})->where('path', '.*')->name('admin.storage');
 
 require __DIR__.'/auth.php';

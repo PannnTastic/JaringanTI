@@ -38,7 +38,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 break-all">{{ $content->content_title }}</h3>
                     <p class="text-gray-600 text-sm mb-4 line-clamp-3 flex-grow break-all">{{ Str::limit(strip_tags($content->content_description), 120) }}</p>
                     @if($content->content_photo)
-                        <img src="{{ asset('storage/' . $content->content_photo) }}" alt="Foto Konten" class="w-full h-40 object-cover rounded-md mb-4">
+                        <img src="{{ asset('admin/storage/' . $content->content_photo) }}" alt="Foto Konten" class="w-full h-40 object-cover rounded-md mb-4">
                         @php
                             $size = null;
                             try {

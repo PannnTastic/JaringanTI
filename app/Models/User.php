@@ -116,7 +116,7 @@ class User extends Authenticatable
     public function getAvatarUrlAttribute(): string
     {
         if ($this->user_photo) {
-            return Storage::url($this->user_photo);
+            return route('admin.storage', ['path' => $this->user_photo]);
         }
 
         return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=random';

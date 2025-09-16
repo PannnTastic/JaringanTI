@@ -1113,7 +1113,7 @@ document.querySelectorAll('.hero-btn').forEach(btn => {
                     @if(isset($slides) && $slides->count() > 0)
                         @foreach($slides as $index => $slide)
                         <div class="slide {{ $index == 0 ? 'active' : '' }}">
-                            <img src="{{ asset('storage/' . $slide->content_photo) }}" 
+                            <img src="{{ asset('admin/storage/' . $slide->content_photo) }}" 
                                  alt="{{ $slide->content_title }}" 
                                  onerror="this.src='https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800&h=500&fit=crop'">
                             <div class="slide-overlay">
